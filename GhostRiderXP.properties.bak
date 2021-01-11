@@ -1,0 +1,45 @@
+#Thu Aug 26 12:24:10 GMT+08:00 2010
+Product=gRider
+#Fri Mar 12 12:24:10 GMT+08:00 2010
+
+#gRider - Main App
+gRider-CryptType=0
+gRider-UserName=_\u00C2
+gRider-Password=m\u00D7\u00A3\u0090"\u00CE\u00D1r\u00B8\u0017>\u00A7
+gRider-ClientID=GGC_BGK01
+gRider-ServerName=172.16.1.6
+gRider-MainServer=172.16.1.6
+gRider-Database=GGC_ISysDBF
+gRider-ComputerID=XX
+gRider-Port=3306
+
+#TeleMktg - Main App
+TeleMktg-CryptType=0
+TeleMktg-UserName=_\u00C2
+TeleMktg-Password=m\u00D7\u00A3\u0090"\u00CE\u00D1r\u00B8\u0017>\u00A7
+TeleMktg-ClientID=GGC_BM0T1
+TeleMktg-ServerName=192.168.10.240
+TeleMktg-MainServer=172.16.1.16
+TeleMktg-Database=GGC_ISysDBF
+TeleMktg-ComputerID=XX
+TeleMktg-Port=3306
+
+#IntegSys - Main App
+IntegSys-CryptType=0
+IntegSys-UserName=_\u00C2
+IntegSys-Password=m\u00D7\u00A3\u0090"\u00CE\u00D1r\u00B8\u0017>\u00A7
+IntegSys-ClientID=GGC_BM001
+IntegSys-ServerName=192.168.10.240
+IntegSys-MainServer=172.16.1.6
+IntegSys-Database=GGC_ISysDBF
+IntegSys-ComputerID=XX
+IntegSys-Port=3306
+
+#Old
+#SysUserFX-CryptType=0
+#SysUserFX-UserName=_\u00C2
+#SysUserFX-Password=m\u00D7\u00A3\u0090"\u00CE\u00D1r\u00B8\u0017>\u00A7
+#New
+#SysUserFX-CryptType=1
+#SysUserFX-UserName=4bcba9906bd5c4
+#SysUserFX-Password=7bd6b481678b8e62a40626b78c
