@@ -4,9 +4,13 @@ import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.agent.GRiderX;
 import org.rmj.mis.util.factory.UtilityValidator;
 import org.rmj.mis.util.factory.UtilityValidatorFactory;
+import org.rmj.replication.utility.LogWrapper;
 
 public class ClientAccounts {
     public static void main (String [] args){
+        LogWrapper logwrapr = new LogWrapper("Client.Utility", "clients.log");
+        logwrapr.info("Start of Process!");
+        
         String path;
         if(System.getProperty("os.name").toLowerCase().contains("win")){
             path = "D:/GGC_Java_Systems";
@@ -20,6 +24,7 @@ public class ClientAccounts {
         
         if(!instance.getErrMsg().isEmpty()){
             System.err.println(instance.getMessage() + instance.getErrMsg());
+            logwrapr.severe(instance.getMessage() + instance.getErrMsg());
             System.exit(1);
         }
         
@@ -31,6 +36,7 @@ public class ClientAccounts {
         
         if (!utility.Run()){
             System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
             System.exit(1);
         }
         
@@ -40,6 +46,7 @@ public class ClientAccounts {
         
         if (!utility.Run()){
             System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
             System.exit(1);
         }
         
@@ -49,6 +56,7 @@ public class ClientAccounts {
         
         
         System.out.println("Thank you!");
+        logwrapr.info("Thank you!");
         //return success
         System.exit(0); 
     }

@@ -2,4 +2,6 @@
 /build/
 /nbproject/private/
 *.log
+*.bak
+*.lck
 GhostRiderXP.properties

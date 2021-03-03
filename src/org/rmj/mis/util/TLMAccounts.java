@@ -3,9 +3,13 @@ package org.rmj.mis.util;
 import org.rmj.appdriver.agent.GRiderX;
 import org.rmj.mis.util.factory.UtilityValidator;
 import org.rmj.mis.util.factory.UtilityValidatorFactory;
+import org.rmj.replication.utility.LogWrapper;
 
 public class TLMAccounts {
     public static void main(String [] args){
+        LogWrapper logwrapr = new LogWrapper("TLM.Utility", "tlm.log");
+        logwrapr.info("Start of Process!");
+        
         String path;
         if(System.getProperty("os.name").toLowerCase().contains("win")){
             path = "D:/GGC_Java_Systems";
@@ -19,6 +23,7 @@ public class TLMAccounts {
         
         if (!instance.logUser("TeleMktg", "M001111122")){
             System.err.println(instance.getMessage() + instance.getErrMsg());
+            logwrapr.severe(instance.getMessage() + instance.getErrMsg());
             System.exit(1);
         }
         
@@ -30,6 +35,7 @@ public class TLMAccounts {
         
         if (!utility.Run()){
             System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
             System.exit(1);
         }        
         
@@ -39,6 +45,7 @@ public class TLMAccounts {
         
         if (!utility.Run()){
             System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
             System.exit(1);
         }  
         
@@ -48,10 +55,12 @@ public class TLMAccounts {
         
         if (!utility.Run()){
             System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
             System.exit(1);
         }
         
         System.out.println("Thank you!");
+        logwrapr.info("Thank you!");
         //return success
         System.exit(0); 
     }

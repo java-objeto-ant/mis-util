@@ -10,7 +10,7 @@ import org.rmj.appdriver.agentfx.CommonUtils;
 public class CI2TLM {
     private final String SOURCECD = "MCCA";
     private final String START_DATE = "2019-09-01";
-    private final int DELAY = -7;
+    private final int DELAY = -3;
     
     private GRider poGRider;
     private String psMessage;

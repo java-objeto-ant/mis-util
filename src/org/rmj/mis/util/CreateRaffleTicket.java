@@ -11,7 +11,7 @@ public class CreateRaffleTicket {
     public static void main(String [] args){
         final String PRODUCTID = "gRider";
         final String USERID = "M001111122";
-        final int FILL = 1000;
+        final int FILL = 10000;
         
         GRider poGRider = new GRider(PRODUCTID);
 

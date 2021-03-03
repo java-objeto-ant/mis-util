@@ -2,8 +2,7 @@ package org.rmj.mis.util.others;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Scanner;
 import org.rmj.appdriver.GRider;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
@@ -27,27 +26,65 @@ public class UpdateJOControlNo {
             MiscUtil.close(poGRider.getConnection());
             System.exit(1);
         }
-        
-        //GMC Manaoag last correct control no: M059191855
-        //GMC Manaoag repeated control no: M05919001856
-        //GMC Manaoag last fixed control no: M05919185630
-        
-        //UEMI Cainta last correct control no: M017199999
-        //UEMI Cainta repeated control no: M01719010000
-        //UEMI Cainta last fixed control no: 
-        String lsSQL = "SELECT sTransNox, sCtrlNoxx" +
-                        " FROM JobOrderBranch_Master" +
-                        " WHERE sTransNox LIKE 'M11020%'" + 
-                            " AND sCtrlNoxx <> ''" +
-                            " AND sCtrlNoxx = 'M11020000392'" +
-                        " ORDER BY sTransNox";
-        
-                        
-        
-        
-        ResultSet loRS = poGRider.executeQuery(lsSQL);
-        
+
         try {
+            String lsSQL = "SELECT YEAR(CURRENT_TIMESTAMP)";;
+            //get the current year
+            ResultSet loRS = poGRider.executeQuery(lsSQL);
+            loRS.next();
+            System.out.println(loRS.getString(1));
+            String lsBranch = poGRider.getBranchCode() +  loRS.getString(1).substring(2);
+            
+            // create a scanner so we can read the command-line input
+            Scanner scanner = new Scanner(System.in);
+            
+            //ask the user to input the control number with 12 character of the branch
+            System.out.print("Please enter the 12 character control number: ");
+            String lsCtrlNoxx = scanner.next().trim();
+            
+            //control number must not be empty
+            if (lsCtrlNoxx.isEmpty()){
+                System.err.println("Control number must not be empty.\nPlease be careful with what your entry.");
+                System.exit(1);
+            }
+            //control number must be on the same branch
+            if (!lsCtrlNoxx.substring(0, 4).equals(poGRider.getBranchCode())){
+                System.err.println("Invalid control number for this branch.\nPlease be careful with what your entry.");
+                System.exit(1);
+            }
+            //control number must be on the same branch and current year
+            if (!lsCtrlNoxx.substring(0, 6).equals(lsBranch)){
+                System.err.println("Control number is not for the current year.\nPlease be careful with what your entry.");
+                System.exit(1);
+            }
+            
+            lsBranch = lsBranch + "%";
+            //check control number if exists on branch table
+            lsSQL = "SELECT sTransNox, sCtrlNoxx" +
+                        " FROM JobOrderBranch_Master" +
+                        " WHERE sTransNox LIKE " + SQLUtil.toSQL(lsBranch) +                            
+                            " AND sCtrlNoxx = " + SQLUtil.toSQL(lsCtrlNoxx) +
+                        " ORDER BY sTransNox";
+            loRS = poGRider.executeQuery(lsSQL);
+            long lnCtr = MiscUtil.RecordCount(loRS);
+             
+            if (lnCtr == 0){
+                System.err.println("Control number is not found on branch table.");
+                System.exit(1);
+            } else if (lnCtr == 1) {
+                System.out.println("Branch JO control number is updated based on the given data.");
+                System.exit(0);
+            }
+            //end - check control number if exists on branch table
+            
+            //update transaction with control number of 10 characters
+            lsSQL = "SELECT sTransNox, sCtrlNoxx" +
+                            " FROM JobOrderBranch_Master" +
+                            " WHERE sTransNox LIKE " + SQLUtil.toSQL(lsBranch) +
+                                " AND sCtrlNoxx <> ''" +
+                                " AND sCtrlNoxx <> " + SQLUtil.toSQL(lsCtrlNoxx) +
+                            " ORDER BY sTransNox";
+            loRS = poGRider.executeQuery(lsSQL);
             poGRider.beginTrans();
             while (loRS.next()){
                 if (loRS.getString("sCtrlNoxx").length() == 10){
@@ -74,9 +111,49 @@ public class UpdateJOControlNo {
                 }
             }
             poGRider.commitTrans();
+            //end - update transaction with control number of 10 characters
+            
+            //update transaction with control number of 12 characters
+            lsSQL = "SELECT sTransNox, sCtrlNoxx" +
+                            " FROM JobOrderBranch_Master" +
+                            " WHERE sTransNox LIKE " + SQLUtil.toSQL(lsBranch) +
+                                " AND sCtrlNoxx <> ''" +
+                                " AND sCtrlNoxx = " + SQLUtil.toSQL(lsCtrlNoxx) +
+                            " ORDER BY sTransNox";
+            loRS = poGRider.executeQuery(lsSQL);
+            poGRider.beginTrans();
+            while (loRS.next()){
+                if (loRS.getString("sCtrlNoxx").length() == 10){
+                    lsSQL = "UPDATE JobOrderBranch_Master SET" +
+                                "  sCtrlNoxx = " + SQLUtil.toSQL(loRS.getString("sCtrlNoxx").substring(0, 6) + "00" + loRS.getString("sCtrlNoxx").substring(6)) +
+                            " WHERE sTransNox = " + SQLUtil.toSQL(loRS.getString("sTransNox"));
+                    System.out.println(lsSQL);
+                    
+                    if (poGRider.executeQuery(lsSQL, "JobOrderBranch_Master", poGRider.getBranchCode(), poGRider.getBranchCode()) == 0){
+                        System.err.println(poGRider.getErrMsg() + "; " + poGRider.getMessage());
+                        poGRider.rollbackTrans();
+                        break;
+                    }
+                } else{
+                    lsSQL = "UPDATE JobOrderBranch_Master SET" +
+                            "  sCtrlNoxx = " + SQLUtil.toSQL(MiscUtil.getNextCode("JobOrderBranch_Master", "sCtrlNoxx", true, poGRider.getConnection(), poGRider.getBranchCode())) +
+                            " WHERE sTransNox = " + SQLUtil.toSQL(loRS.getString("sTransNox"));
+
+                    if (poGRider.executeQuery(lsSQL, "JobOrderBranch_Master", poGRider.getBranchCode(), poGRider.getBranchCode()) == 0){
+                        System.err.println(poGRider.getErrMsg() + "; " + poGRider.getMessage());
+                        poGRider.rollbackTrans();
+                        break;
+                    }
+                }
+            }
+            poGRider.commitTrans();
+            //end - update transaction with control number of 12 characters
+            
             System.out.println("Updated successully...");
+            System.exit(0);
         } catch (SQLException ex) {
-            Logger.getLogger(UpdateJOControlNo.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+            System.exit(1);
         }
     }
 }
