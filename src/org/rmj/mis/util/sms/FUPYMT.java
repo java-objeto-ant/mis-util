@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
@@ -28,6 +26,7 @@ public class FUPYMT implements iSMS{
     String psMessage;
     String psTemplate;
     int pnRow;
+    int pnInvalid;
     
     ArrayList<String> loTemplate;
     
@@ -43,6 +42,7 @@ public class FUPYMT implements iSMS{
         loTemplate.add("<xMgrCelNo>");
         
         pnRow = 0;
+        pnInvalid = 0;
     }
 
     @Override
@@ -66,10 +66,9 @@ public class FUPYMT implements iSMS{
             
             lsSQL = getSQ_Master();
             //if client query is not empty then continue loading
-            if (lsSQL.equals("")) return true;
+            if (lsSQL.equals("")) return false;
             
             loRS = oApp.executeQuery(lsSQL);
-            
             
             String lsMessagex;
             String lsMobileNo;
@@ -105,7 +104,9 @@ public class FUPYMT implements iSMS{
                     }
                     
                     pnRow += 1;
-                }
+                } else
+                    pnInvalid += 1; 
+                
             }
             oApp.commitTrans();
         } catch (SQLException ex) {
@@ -118,8 +119,13 @@ public class FUPYMT implements iSMS{
     }
     
     @Override
-    public int ItemCount() {
+    public int getItemCount() {
         return pnRow;
+    }
+    
+    @Override
+    public int getInvalid() {
+        return pnInvalid;
     }
 
     @Override
@@ -202,6 +208,7 @@ public class FUPYMT implements iSMS{
             else{
                 if (CommonUtils.dateDiff(SQLUtil.toDate(loRS.getString("dTransact"), SQLUtil.FORMAT_SHORT_DATE), 
                                         SQLUtil.toDate(oApp.getServerDate().toString(), SQLUtil.FORMAT_SHORT_DATE)) == 0){
+                    psMessage = "Text reminders are already created for this day.";
                     return "";
                 } else {
                     lnDaysFrom = DAYSB4 - ((int) CommonUtils.dateDiff(SQLUtil.toDate(oApp.getServerDate().toString(), SQLUtil.FORMAT_SHORT_DATE), 
@@ -211,7 +218,7 @@ public class FUPYMT implements iSMS{
             }
             
             if (lnDaysFrom == 0 || lnDaysFrom == DAYSB4){
-                ldStart = CommonUtils.dateAdd(oApp.getServerDate(), 1);
+                ldStart = CommonUtils.dateAdd(oApp.getServerDate(), DAYSB4);
                 
                 if (CommonUtils.getDateMonth(ldStart) != CommonUtils.getDateMonth(CommonUtils.dateAdd(ldStart, 1))){
                     //if date is last day of the month, always include up to 31
@@ -384,7 +391,7 @@ public class FUPYMT implements iSMS{
                     " GROUP BY sAcctNmbr" +
                     " HAVING IFNULL(sAcctNmbr, '') <> '' AND xNoClient = 1 ";
         } catch (SQLException ex) {
-            Logger.getLogger(FUPYMT.class.getName()).log(Level.SEVERE, null, ex);
+            psMessage = ex.getMessage();
         }
         
         return lsSQL;

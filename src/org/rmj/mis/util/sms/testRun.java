@@ -33,7 +33,8 @@ public class testRun {
             System.exit(1);
         }
             
-        logwrapr.info(processor.ItemCount() + " messages was created for " + SQLUtil.dateFormat(instance.getServerDate(), SQLUtil.FORMAT_SHORT_DATE));
+        logwrapr.info(processor.getItemCount() + " messages was created for " + SQLUtil.dateFormat(instance.getServerDate(), SQLUtil.FORMAT_SHORT_DATE) + 
+                        " with " + processor.getInvalid() + " invalid mobile numbers.");
         System.exit(0);
     }
 }
