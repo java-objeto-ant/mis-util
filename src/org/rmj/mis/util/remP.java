@@ -1,10 +1,12 @@
-package org.rmj.mis.util.sms;
+package org.rmj.mis.util;
 
 import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
+import org.rmj.mis.util.sms.FUPYMT;
+import org.rmj.mis.util.sms.iSMS;
 import org.rmj.replication.utility.LogWrapper;
 
-public class testRun {
+public class REMP {
     public static void main(String [] args){        
         LogWrapper logwrapr = new LogWrapper("remP", "css.log");
         logwrapr.info("Start of Process!");

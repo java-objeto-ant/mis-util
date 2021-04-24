@@ -13,9 +13,43 @@ import org.rmj.appdriver.agentfx.CommonUtils;
 public class RecalculateAR {
     GRider oApp;
     ResultSet oRS;
+    ResultSet oRSx;
+    String sMessage;
     
     public RecalculateAR(GRider foApp){
         oApp = foApp;
+        
+        sMessage = "";
+    }
+    
+    public boolean Recalc(){
+        try {
+            if(oApp == null){
+                sMessage = "Application driver is not set.";
+                return false;
+            }
+            
+            //get all active AR accounts
+            String lsSQL = "SELECT sAcctNmbr FROM MC_AR_Master" +
+                            " WHERE cAcctStat = '0'";
+            oRS = oApp.executeQuery(lsSQL);
+            
+            while (oRS.next()){
+                //get the master info of AR account
+                lsSQL = "SELECT * FROM MC_AR_Master" +
+                            " WHERE sAcctNmbr = " + SQLUtil.toSQL(oRS.getString(("sAcctNmbr")));
+                oRSx = oApp.executeQuery(lsSQL);
+                
+                if (oRSx.next()){
+                
+                }
+            }
+            
+            return true;
+        } catch (SQLException ex) {
+            sMessage = ex.getMessage();
+            return false;
+        }
     }
     
     private double getAveDelay(Date fdDate){
@@ -59,7 +93,7 @@ public class RecalculateAR {
                     
                     //kalyptus - 2020.05.29 01:59pm
                     //Remove number of freezed month from the delay
-                    lnDelayxxx -= getgetFreezeMonth(oRS.getString("sAcctNmbr"), ldTranDate);
+                    lnDelayxxx -= getFreezeMonth(oRS.getString("sAcctNmbr"), ldTranDate);
                     
                     lnTotDelay += lnDelayxxx;
                     
@@ -93,7 +127,7 @@ public class RecalculateAR {
         return -100;
     }
     
-    private int getgetFreezeMonth(String fsAcctNmbr, Date fdTransact){
+    private int getFreezeMonth(String fsAcctNmbr, Date fdTransact){
         String lsSQL = "SELECT sAcctNmbr, b.*" +
                         " FROM MC_AR_Master a" +
                             " LEFT JOIN Branch_Lockdown_History b ON a.sBranchCd = b.sBranchCD" +
@@ -151,5 +185,9 @@ public class RecalculateAR {
             else
                 return "b";
         }
+    }
+    
+    public String getMessage(){
+        return sMessage;
     }
 }
