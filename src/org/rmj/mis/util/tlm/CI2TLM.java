@@ -124,7 +124,7 @@ public class CI2TLM {
             while(loRSBranch.next()){
                 System.out.println(loRSBranch.getString("sBranchNm"));
                 
-                lsSQL = SQLUtil.dateFormat(poGRider.getServerDate(), SQLUtil.FORMAT_SHORT_YEAR);
+                lsSQL = SQLUtil.dateFormat(poGRider.getServerDate(), "yy");
                 
                 lsSQL = MiscUtil.addCondition(getSQ_Master(), 
                             "a.sTransNox LIKE " + SQLUtil.toSQL(loRSBranch.getString("sBranchCd") + lsSQL + "%"));

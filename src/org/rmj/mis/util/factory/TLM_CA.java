@@ -135,7 +135,7 @@ public class TLM_CA implements UtilityValidator{
             while(loRSBranch.next()){
                 System.out.println(loRSBranch.getString("sBranchCD") + " - " + loRSBranch.getString("sBranchNm"));
                 
-                lsSQL = SQLUtil.dateFormat(instance.getServerDate(), SQLUtil.FORMAT_SHORT_YEAR);
+                lsSQL = SQLUtil.dateFormat(instance.getServerDate(), "yy");
                 
                 lsSQL = MiscUtil.addCondition(getSQ_Master(), 
                             "a.sTransNox LIKE " + SQLUtil.toSQL(loRSBranch.getString("sBranchCd") + lsSQL + "%"));
