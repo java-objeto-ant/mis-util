@@ -61,7 +61,7 @@
                 <id>jar</id>
             </reference>
             <reference>
-                <foreign-project>gcard-base-misc</foreign-project>
+                <foreign-project>replication-client</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>
@@ -77,7 +77,7 @@
                 <id>jar</id>
             </reference>
             <reference>
-                <foreign-project>webcamfx</foreign-project>
+                <foreign-project>rmj-lib</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>

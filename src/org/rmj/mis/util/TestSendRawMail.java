@@ -55,10 +55,10 @@ public class TestSendRawMail {
             switch(args.length){
                 case 0:
                     args_0 = "access";
-                    param.put("to", "mtcuison@guanzongroup.com.ph");
+                    param.put("to", "xurpas7@gmail.com");
                     param.put("subject", "Send Raw Mail");
                     param.put("body", "This is a sample email using sendrawmail.php");
-                    filex =  new File("D:/Special DOH Checklist.pdf");
+                    filex =  new File("D:/COL Webinar - 2020 03 20 - Investing in Today_s Market Volatility 1 - Slides.pdf");
                     param.put("data1", encodeFileToBase64Binary(filex));
                     param.put("filename1", filex.getName());
                     //System.out.println(param.get("g-edoc-imge"));
