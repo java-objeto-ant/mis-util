@@ -6,7 +6,7 @@ import org.rmj.mis.util.sms.FUPYMT;
 import org.rmj.mis.util.sms.iSMS;
 import org.rmj.replication.utility.LogWrapper;
 
-public class REMP {
+public class remP {
     public static void main(String [] args){        
         LogWrapper logwrapr = new LogWrapper("remP", "css.log");
         logwrapr.info("Start of Process!");

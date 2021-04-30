@@ -1,4 +1,4 @@
-package org.rmj.mis.util.others;
+/*package org.rmj.mis.util.others;
 
 
 import org.rmj.gcard.base.misc.GCEncoder;
@@ -41,4 +41,4 @@ public class SmartcardPointsUpdate {
         
         GCEncoder.disconnect();
     }
-}
+}*/
