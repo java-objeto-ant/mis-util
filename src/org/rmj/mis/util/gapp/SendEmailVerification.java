@@ -36,9 +36,8 @@ public class SendEmailVerification {
         }
                 
         String lsSQL = "SELECT * FROM App_User_Master" +
-                        " WHERE sProdctID = 'GuanzonApp'" +
-                            " AND cActivatd = '0'" + 
-                            " AND sUserIDxx IN ('GAP020201647')";
+                        " WHERE cActivatd = '0'" + 
+                            " AND sUserIDxx IN ('GAP021006601')";
         
         ResultSet loRS = poGRider.executeQuery(lsSQL);
         

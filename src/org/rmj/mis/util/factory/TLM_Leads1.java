@@ -8,9 +8,14 @@ import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
 import org.rmj.appdriver.agentfx.CommonUtils;
 
-public class TLM_Leads implements UtilityValidator{
-    private final int pxe2Fill = 100;
-    private final int pxePriorityFill = 20;
+/**
+ * @author Mac 2022.07.27
+ */
+
+public class TLM_Leads1 implements UtilityValidator{
+    private final int pxe2Fill = 30;
+    private final int pxePriorityFill = 25;
+    private final int pxeLastDateInqr = -60;
     private final String pxeInquiry = "2021-05-01";
     
     private GRiderX instance;
@@ -30,30 +35,30 @@ public class TLM_Leads implements UtilityValidator{
     public boolean Run() {        
         //top priority MC Facebook Inquiries
         int lnTotal = 0;
-        int lnFilled = processLeads(fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE)), pxePriorityFill, "0");
+        int lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE),"0");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - GLOBE");
         lnTotal += lnFilled;
         
-        lnFilled = processLeads(fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE)), pxePriorityFill, "1");
+        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SMART");
         lnTotal += lnFilled;
         
-        lnFilled = processLeads(fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE)), pxePriorityFill, "2");
+        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SUN");
         lnTotal += lnFilled;
         System.out.println("System inserted total of " + lnTotal + " facebook inquiries from MC. - ALL NETWORKS");
         
         //top priority MP Facebook Inquiries
         lnTotal = 0;
-        lnFilled = processLeads(fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE)), pxePriorityFill, "0");
+        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "0");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - GLOBE");
         lnTotal += lnFilled;
         
-        lnFilled = processLeads(fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE)), pxePriorityFill, "1");
+        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SMART");
         lnTotal += lnFilled;
         
-        lnFilled = processLeads(fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE)), pxePriorityFill, "2");
+        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SUN");
         lnTotal += lnFilled;
         System.out.println("System inserted total of " + lnTotal + " facebook inquiries from MP. - ALL NETWORKS");
@@ -137,7 +142,7 @@ public class TLM_Leads implements UtilityValidator{
     
     //mac 2021.05.22
     //  separate retreival of FB Inquiries to set as top priority on TLM Leads
-    private ResultSet fill_sched_from_inquiry(String fsDivision, String fsInquryTp, Date ldStart){
+    private int fill_sched_from_inquiry(String fsDivision, String fsInquryTp, Date ldStart, String fcSubscrbr){
         String lsSQL;
         
         switch (fsDivision.toLowerCase()){
@@ -148,111 +153,249 @@ public class TLM_Leads implements UtilityValidator{
                 lsSQL = "MP_Product_Inquiry";
                 break;
             default:
-                return null;
+                return 0;
         }
         
-        if (fsInquryTp.toLowerCase().equals("fb")){
-            lsSQL = "SELECT '' sMobileNo, sClientID, dFollowUp, sTransNox, '" + lsSQL + "' sTableNme, dTransact, sCreatedx" + 
-                        " FROM " + lsSQL +
-                        " WHERE cTranStat = '0'" +
-                            " AND dTransact >= " + SQLUtil.toSQL(ldStart) +
-                            " AND sInquiryx = " + SQLUtil.toSQL(fsInquryTp) +
-                            " AND(" +
-                                " (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" +
-                                    " OR (dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE) AND dFollowUp IS NULL)" +
-                                    " OR (sInquiryx = 'WI' AND @xTransact >= dTransact AND dTargetxx IS NULL AND dFollowUp IS NULL)" +
-                                " )" +
-                        " ORDER BY dFollowUp DESC, dTargetxx DESC, dTransact DESC";
+        if (fsDivision.toLowerCase().equals("mc")){
+            lsSQL = "SELECT" + 
+                        "  b.sMobileNo" +
+                        ", a.sClientID" +
+                        ", a.dFollowUp" +
+                        ", a.sTransNox" +
+                        ", " + SQLUtil.toSQL(lsSQL) + " sTableNme" + 
+                        ", a.dTransact" +
+                        ", a.sCreatedx" +
+                        ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" +
+                    " FROM" + 
+                        "  MC_Product_Inquiry a" +  
+                        ", Client_Master b" + 
+                        ", Client_Mobile c" +  
+                    " WHERE a.sClientID = b.sClientID" +
+                        " AND b.sClientID = c.sClientID" +
+                        " AND b.sMobileNo = c.sMobileNo" +
+                        " AND c.cSubscrbr = " + SQLUtil.toSQL(fcSubscrbr) +
+                        " AND a.cTranStat = '0'" +  
+                        " AND a.dTransact >= " + SQLUtil.toSQL(ldStart) +
+                        " AND a.sInquiryx = " + SQLUtil.toSQL(fsInquryTp) +
+                        " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" +  
+                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" +  
+                            " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" +  
+                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" +  
+                                " AND a.dFollowUp IS NULL)" +  
+                            " OR (a.sInquiryx = 'WI'" +  
+                                " AND @xTransact >= a.dTransact" +  
+                                " AND a.dTargetxx IS NULL" +  
+                                " AND a.dFollowUp IS NULL))" +  
+                    " ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact DESC";
         } else {
-            lsSQL = "SELECT '' sMobileNo, sClientID, dFollowUp, sTransNox, '" + lsSQL + "' sTableNme, dTransact, sCreatedx" + 
-                        " FROM " + lsSQL +
-                        " WHERE cTranStat = '0'" +
-                            " AND dTransact >= " + SQLUtil.toSQL(ldStart) +
-                            " AND sInquiryx <> " + SQLUtil.toSQL(fsInquryTp) +
-                            " AND(" +
-                                " (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" +
-                                    " OR (dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE) AND dFollowUp IS NULL)" +
-                                    " OR (sInquiryx = 'WI' AND @xTransact >= dTransact AND dTargetxx IS NULL AND dFollowUp IS NULL)" +
-                                " )" +
-                        " ORDER BY dFollowUp DESC, dTargetxx DESC, dTransact DESC";
+            lsSQL = "SELECT" + 
+                        "  b.sMobileNo" +
+                        ", a.sClientID" +
+                        ", a.dFollowUp" +
+                        ", a.sTransNox" +
+                        ", " + SQLUtil.toSQL(lsSQL) + " sTableNme" + 
+                        ", a.dTransact" +
+                        ", a.sCreatedx" +
+                        ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" +
+                    " FROM" +
+                        "  MP_Product_Inquiry a" +
+                        ", Client_Master b" +
+                        ", Client_Mobile c" + 
+                    " WHERE a.sClientID = b.sClientID" +
+                        " AND b.sClientID = c.sClientID" +
+                        " AND b.sMobileNo = c.sMobileNo" +
+                        " AND c.cSubscrbr = " + SQLUtil.toSQL(fcSubscrbr) +
+                        " AND a.cTranStat = '0'" +  
+                        " AND a.dTransact >= " + SQLUtil.toSQL(ldStart) +
+                        " AND a.sInquiryx = " + SQLUtil.toSQL(fsInquryTp) +
+                        " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" + 
+                            " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                                " AND a.dFollowUp IS NULL)" + 
+                            " OR (a.sInquiryx = 'WI'" + 
+                                " AND @xTransact >= a.dTransact" + 
+                                " AND a.dTargetxx IS NULL" + 
+                                " AND a.dFollowUp IS NULL))" + 
+                        "ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact DESC";
         }
         
         
-        return instance.executeQuery(lsSQL);
+        return processLeads(instance.executeQuery(lsSQL), pxePriorityFill, fcSubscrbr);
     }
     
     
     //Retrieve records to be scheduled...
     //===================================
     private void fill_sched(int n2Fill, String lcSubScribe){        
-        StringBuilder lsSQL = new StringBuilder();
+        String lsSQL;
         
         //kalyptus - 2017.10.10 09:17am
         //load MC_Product_Inquiry: 2 DAYS AGO upto 10 minutes before the scheduled followup...
         //                 and if Walk inquiry after 7 days ago... Previously it was 60 days ago.
-        lsSQL.append(" SELECT '' sMobileNo, sClientID, dFollowUp, dTargetxx, sTransNox, 'MC_Product_Inquiry' sTableNme, dTransact, sCreatedx, @xTransact :=  DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact"
-                    + " FROM MC_Product_Inquiry"
-                    + " WHERE cTranStat = '0'"
-                        + " AND sInquiryx <> 'FB'"
-                        + " AND("
-                        + "    (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" +
-                            "    OR (dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE) AND dFollowUp IS NULL)" +
-                            "    OR (sInquiryx = 'WI' AND @xTransact >= dTransact AND dTargetxx IS NULL AND dFollowUp IS NULL)" +
-                            "   )" +
-                            "   AND dTransact >= '2020-01-01'");
+        lsSQL = "SELECT" + 
+                    "  b.sMobileNo" +
+                    ", a.sClientID" +
+                    ", a.dFollowUp" +
+                    ", a.dTargetxx" +
+                    ", a.sTransNox" +
+                    ", 'MC_Product_Inquiry' sTableNme" +
+                    ", a.dTransact" +
+                    ", a.sCreatedx" +
+                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                " FROM" +
+                    "  MC_Product_Inquiry a" +
+                    ", Client_Master b" +
+                    ", Client_Mobile c" +
+                " WHERE a.sClientID = b.sClientID" +
+                    " AND b.sClientID = c.sClientID" +
+                    " AND b.sMobileNo = c.sMobileNo" +
+                    " AND a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)) +
+                    " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
+                    " AND a.cTranStat = '0'" + 
+                    " AND a.sInquiryx <> 'FB'" + 
+                    " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" + 
+                        " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                            " AND a.dFollowUp IS NULL)" + 
+                        " OR (a.sInquiryx = 'WI'" + 
+                            " AND @xTransact >= a.dTransact" + 
+                            " AND a.dTargetxx IS NULL" + 
+                            " AND a.dFollowUp IS NULL))" + 
+                    " AND a.dTransact >= '2020-01-01'";
 
         //load MP_Product_Inquiry: 2 DAYS AGO upto 10 minutes before the scheduled followup...
         //                 and if Walk inquiry after 7 days ago... Previously it was 60 days ago.
-        lsSQL.append(" UNION ");
-        lsSQL.append(" SELECT '' sMobileNo, sClientID, dFollowUp, dTargetxx, sTransNox, 'MP_Product_Inquiry' sTableNme, dTransact, sCreatedx, @xTransact :=  DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact"
-                    + " FROM MP_Product_Inquiry"
-                    + " WHERE cTranStat = '0'"
-                        + " AND sInquiryx <> 'FB'"
-                        + " AND("
-                        + "    (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" +
-                            "    OR (dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE) AND dFollowUp IS NULL)" +
-                            "    OR (sInquiryx = 'WI' AND @xTransact >= dTransact AND dTargetxx IS NULL AND dFollowUp IS NULL)" +
-                            "   )" +
-                            "   AND dTransact >= '2020-01-01'");
+        lsSQL += " UNION ";
+        lsSQL += "SELECT" + 
+                    "  b.sMobileNo" +
+                    ", a.sClientID" +
+                    ", a.dFollowUp" +
+                    ", a.dTargetxx" +
+                    ", a.sTransNox" +
+                    ", 'MP_Product_Inquiry' sTableNme" +
+                    ", a.dTransact" +
+                    ", a.sCreatedx" +
+                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                " FROM" +
+                    "  MP_Product_Inquiry a" +
+                    ", Client_Master b" +
+                    ", Client_Mobile c" + 
+                " WHERE a.sClientID = b.sClientID" +
+                    " AND b.sClientID = c.sClientID" +
+                    " AND b.sMobileNo = c.sMobileNo" +
+                    " AND a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)) +
+                    " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
+                    " AND a.cTranStat = '0'" + 
+                    " AND a.sInquiryx <> 'FB'" + 
+                    " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" + 
+                        " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                            " AND a.dFollowUp IS NULL)" + 
+                        " OR (a.sInquiryx = 'WI'" + 
+                            " AND @xTransact >= a.dTransact" + 
+                            " AND a.dTargetxx IS NULL" + 
+                            " AND a.dFollowUp IS NULL))" + 
+                    " AND a.dTransact >= '2020-01-01'";
 
         //load MC_Referral: 2 DAYS AGO upto 10 minutes before the scheduled followup...
-        lsSQL.append(" UNION ");
-        lsSQL.append(" SELECT '' sMobileNo, sClientID, dFollowUp, dTargetxx, sTransNox, 'MC_Referral' sTableNme, dTransact, '' sCreatedx, @xTransact :=  DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact"
-                    + " FROM MC_Referral"
-                    + " WHERE cTranStat = '0'"
-                        + " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE) OR dFollowUp IS NULL)");
+        lsSQL += " UNION ";
+        lsSQL += "SELECT" + 
+                    "  b.sMobileNo" +
+                    ", a.sClientID" +
+                    ", a.dFollowUp" +
+                    ", a.dTargetxx" +
+                    ", a.sTransNox" +
+                    ", 'MC_Referral' sTableNme" +
+                    ", a.dTransact" +
+                    ", '' sCreatedx" +
+                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                " FROM" +
+                    "  MC_Referral a" +
+                    ", Client_Master b" +
+                    ", Client_Mobile c" + 
+                " WHERE a.sClientID = b.sClientID" +
+                    " AND b.sClientID = c.sClientID" +
+                    " AND b.sMobileNo = c.sMobileNo" +
+                    " AND c.cSubscrbr = '0'" +
+                    " AND a.cTranStat = '0'" + 
+                    " AND (a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                        " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                        " OR a.dFollowUp IS NULL)"; 
 
         //load Call_Incoming: 2 DAYS AGO upto 10 minutes before the scheduled followup...
-        lsSQL.append(" UNION ");
-        lsSQL.append(" SELECT sMobileNo, '' sClientID, dFollowUp, NULL dTargetxx, sTransNox, 'Call_Incoming' sTableNme, dTransact, '' sCreatedx, @xTransact :=  DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact"
-                    + " FROM Call_Incoming"
-                    + " WHERE cTranStat = '0'"
-                        + " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE) OR dFollowUp IS NULL)"
-                        + " AND sMobileNo <> ''");
+        lsSQL += " UNION ";
+        lsSQL += "SELECT" + 
+                    "  sMobileNo" +
+                    ", '' sClientID" +
+                    ", dFollowUp" +
+                    ", NULL dTargetxx" +
+                    ", sTransNox" +
+                    ", 'Call_Incoming' sTableNme" +
+                    ", dTransact" +
+                    ", '' sCreatedx" +
+                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                " FROM Call_Incoming" + 
+                " WHERE cTranStat = '0'" + 
+                    " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                        " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                        " OR dFollowUp IS NULL)" + 
+                    " AND LENGTH(REPLACE(REPLACE(sMobileNo, '+', ''), '*', '')) = 11" +
+                    " AND REPLACE(REPLACE(sMobileNo, '+', ''), '*', '') <> ''";
 
         //load SMS_Incoming: 2 DAYS AGO upto 10 minutes before the scheduled followup...
-        lsSQL.append(" UNION ");
-        lsSQL.append(" SELECT sMobileNo, '' sClientID, dFollowUp, NULL dTargetxx, sTransNox, 'SMS_Incoming' sTableNme, dTransact, '' sCreatedx, @xTransact :=  DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact"
-                    + " FROM SMS_Incoming"
-                    + " WHERE cTranStat = '0'"
-                        + " AND cReadxxxx = '1'"
-                        + " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE) OR dFollowUp IS NULL)"
-                        + " AND sMessagex NOT LIKE '%FSE%'");
+        lsSQL += " UNION ";
+        lsSQL += "SELECT" + 
+                    "  sMobileNo" +
+                    ", '' sClientID" +
+                    ", dFollowUp" +
+                    ", NULL dTargetxx" +
+                    ", sTransNox" +
+                    ", 'SMS_Incoming' sTableNme" +
+                    ", dTransact" +
+                    ", '' sCreatedx" +
+                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                " FROM SMS_Incoming" + 
+                " WHERE cTranStat = '0'" + 
+                    " AND cReadxxxx = '1'" + 
+                    " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                        " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                        " OR dFollowUp IS NULL)" + 
+                    " AND sMessagex NOT LIKE '%FSE%'";
 
         //load SMS_Incoming: 2 DAYS AGO upto 10 minutes before the scheduled followup...
         //kalyptus - 2018.04.18 10:59am
         //contact MP costumer only...
-        lsSQL.append(" UNION ");
-        lsSQL.append(" (SELECT '' sMobileNo, sClientID, dFollowUp, NULL dTargetxx, sClientID sTransNox, 'TLM_Client' sTableNme, dFollowUp dTransact, '' sCreatedx, @xTransact :=  DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact"
-                    + " FROM TLM_Client"
-                    + " WHERE cTranStat = '0'"
-                        + " AND cSourceCd = 'MP'" 
-                        + " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY) AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)"
-                        +       " OR dFollowUp IS NULL))");
+        lsSQL += " UNION ";
+        lsSQL += "SELECT" + 
+                    "  b.sMobileNo" +
+                    ", a.sClientID" +
+                    ", a.dFollowUp" +
+                    ", NULL dTargetxx" +
+                    ", a.sClientID sTransNox" +
+                    ", 'TLM_Client' sTableNme" +
+                    ", a.dFollowUp dTransact" +
+                    ", '' sCreatedx" +
+                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                " FROM" +
+                    "  TLM_Client a" +
+                    ", Client_Master b" +
+                    ", Client_Mobile c" + 
+                " WHERE a.sClientID = b.sClientID" +
+                    " AND b.sClientID = c.sClientID" +
+                    " AND b.sMobileNo = c.sMobileNo" +
+                    " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
+                    " AND a.cTranStat = '0'" + 
+                    " AND a.cSourceCd = 'MP'" + 
+                    " AND (a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                       " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                       " OR a.dFollowUp IS NULL)";
 
-        lsSQL.append(" ORDER BY dFollowUp DESC, dTargetxx DESC, dTransact DESC");
+        lsSQL += " ORDER BY dFollowUp DESC, dTargetxx DESC, dTransact DESC LIMIT 100";
         
-        ResultSet loRS = instance.executeQuery(lsSQL.toString());
+        ResultSet loRS = instance.executeQuery(lsSQL);
         processLeads(loRS, n2Fill, lcSubScribe);
     }
     
@@ -276,7 +419,7 @@ public class TLM_Leads implements UtilityValidator{
                 if(loRS.getString("sTableNme").equalsIgnoreCase("MC_Product_Inquiry")){
                     lsSourceCD = "INQR";
                     lsClientID = loRS.getString("sClientID");
-                    lsMobileNo = getMobile(loRS.getString("sClientID"), loRS.getString("sTransNox"));
+                    lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
                     lsCreatedx = "";
                     
@@ -289,7 +432,7 @@ public class TLM_Leads implements UtilityValidator{
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("MP_Product_Inquiry")){
                     lsSourceCD = "MPIn";
                     lsClientID = loRS.getString("sClientID");
-                    lsMobileNo = getMobile(loRS.getString("sClientID"), loRS.getString("sTransNox"));
+                    lsMobileNo = loRS.getString("sMobileNo");
                     lsCreatedx = "";
                     
                     if (loRS.getString("sCreatedx") != null)
@@ -301,7 +444,7 @@ public class TLM_Leads implements UtilityValidator{
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("MC_Referral")){
                     lsSourceCD = "RFRL";
                     lsClientID = loRS.getString("sClientID");
-                    lsMobileNo = getMobile(loRS.getString("sClientID"), loRS.getString("sTransNox"));
+                    lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
                     lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));
                 }
@@ -322,7 +465,7 @@ public class TLM_Leads implements UtilityValidator{
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("TLM_Client")){
                     lsSourceCD = "TLMC";
                     lsClientID = loRS.getString("sClientID");
-                    lsMobileNo = getMobile(loRS.getString("sClientID"), loRS.getString("sTransNox"));
+                    lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
                     lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));
                 }            
@@ -440,7 +583,19 @@ public class TLM_Leads implements UtilityValidator{
                                 instance.executeQuery(lsSQL.toString(), loRS.getString("sTableNme"), "", "");
                             }
                         } //if(!loRSX.next())
-                    } //if(bglobe == lbIsGlobe)
+                    } else {
+                        if (lcSubscrbr.isEmpty()){
+                            if (loRS.getString("sTableNme").equalsIgnoreCase("Call_Incoming") ||
+                                loRS.getString("sTableNme").equalsIgnoreCase("SMS_Incoming")){
+                                lsSQL = new StringBuilder();
+                                //tag transaction as invalid
+                                lsSQL.append("UPDATE " + loRS.getString("sTableNme")
+                                            + " SET cTranStat = '3'" 
+                                            + " WHERE sTransNox = " + SQLUtil.toSQL(loRS.getString("sTransNox")));
+                                instance.executeQuery(lsSQL.toString(), loRS.getString("sTableNme"), "", "");
+                            }
+                        }
+                    }
                 } //if(lsMobileNo.length() > 5)
             } //while(loRS.next() && lnCtr < n2Fill)
          

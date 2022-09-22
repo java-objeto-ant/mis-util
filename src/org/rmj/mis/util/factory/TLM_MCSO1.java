@@ -7,10 +7,14 @@ import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
 import org.rmj.appdriver.agentfx.CommonUtils;
 
-public class TLM_MCSO implements UtilityValidator{
+/**
+ * @author Mac 2022.07.27
+ */
+
+public class TLM_MCSO1 implements UtilityValidator{
     private final String SOURCECD = "MCSO";
     private final String START_DATE = "2018-01-01";
-    private final int FILL = 50;
+    private final int FILL = 20;
     private final String GLOBE = "0";
     private final String SMART = "1";
     private final String SUNPH = "2";
@@ -220,7 +224,11 @@ public class TLM_MCSO implements UtilityValidator{
                             " ON b.sTownIDxx = d.sTownIDxx" +
                         " LEFT JOIN Occupation f" +
                             " ON b.sOccptnID = f.sOccptnID" +
+                    ", Client_Mobile h" +
                 " WHERE a.sClientID = b.sClientID" +
+                    " AND b.sClientID = h.sClientID" +
+                    " AND b.sMobileNo = h.sMobileNo" +
+                    " AND h.cSubscrbr = " + SQLUtil.toSQL(fcSubscrbr) +
                     " AND a.dTransact >= " + SQLUtil.toSQL(START_DATE) + 
                     " AND a.cTranStat NOT IN ('3', '6', '7')" +
                     " AND a.cPaymForm = '0'" +
@@ -228,8 +236,7 @@ public class TLM_MCSO implements UtilityValidator{
                         " OR LENGTH(TRIM(REPLACE(REPLACE(REPLACE(b.sPhoneNox,'(',''), ')',''),'-',''))) = 11)" +
                     " AND (a.nLeadType IS NULL OR a.nLeadType NOT IN('2','3','4', '6', '10', '18', '34', '66', '130'))" +
                 " GROUP BY b.sCLientID" +
-                " ORDER BY a.dTransact" +
-                " LIMIT 100000";
+                " ORDER BY a.dTransact";
     }
     
     private boolean isClientDuplicate(String fsClientID, String fsMobileNo) throws SQLException{
