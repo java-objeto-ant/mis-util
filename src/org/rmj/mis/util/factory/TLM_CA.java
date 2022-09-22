@@ -9,8 +9,8 @@ import org.rmj.appdriver.agentfx.CommonUtils;
 
 public class TLM_CA implements UtilityValidator{
     private final String SOURCECD = "MCCA";
-    private final String START_DATE = "2019-09-01";
-    private final int DELAY = -7;
+    private final String START_DATE = "2021-05-01"; //"2019-09-01"
+    private final int DELAY = -3;
 
     private GRiderX instance;
     private String sMessage;
@@ -30,7 +30,7 @@ public class TLM_CA implements UtilityValidator{
         System.out.println("Updating leads that already purchased....");
         if (!updateReleased()) return false;
         
-        System.out.println("Converting approved by more than 7 days applications to leads....");
+        System.out.println("Converting approved by more than " + Math.abs(DELAY) +" days applications to leads....");
         return create(true);
     }
 
@@ -202,29 +202,80 @@ public class TLM_CA implements UtilityValidator{
         
         if (lsNetwork.equals("")) return "";
         
-        return "INSERT INTO Call_Outgoing SET" +
-                "  sTransNox = " + SQLUtil.toSQL(MiscUtil.getNextCode("Call_Outgoing", "sTransNox", true, instance.getConnection(), instance.getBranchCode())) +
-                ", dTransact = " + SQLUtil.toSQL(instance.getServerDate())+
-                ", sClientID = " + SQLUtil.toSQL(fsClientID) +
-                ", sMobileNo = " + SQLUtil.toSQL(fsMobileNo) +
-                ", sRemarksx = ''" +
-                ", sReferNox = " + SQLUtil.toSQL(fsTransNox) +
-                ", sSourceCd = " + SQLUtil.toSQL(SOURCECD)+
-                ", sApprovCd = ''" +
-                ", cTranStat = '0'" +
-                ", sAgentIDx = ''" +
-                ", dCallStrt = NULL" +
-                ", dCallEndx = NULL" +
-                ", nNoRetryx = 0" +
-                ", cSubscrbr = " + SQLUtil.toSQL(lsNetwork) +
-                ", cTLMStatx = ''" +
-                ", cSMSStatx = '0'" +
-                ", nSMSSentx = 0" +
-                ", sModified = " + SQLUtil.toSQL(instance.getUserID()) +
-                ", dModified = " + SQLUtil.toSQL(instance.getServerDate());
+        String lsAgentIDx = getAgentIDx(SOURCECD, fsTransNox);
+        
+        if (lsAgentIDx.isEmpty())
+            return "INSERT INTO Call_Outgoing SET" +
+                    "  sTransNox = " + SQLUtil.toSQL(MiscUtil.getNextCode("Call_Outgoing", "sTransNox", true, instance.getConnection(), instance.getBranchCode())) +
+                    ", dTransact = " + SQLUtil.toSQL(instance.getServerDate())+
+                    ", sClientID = " + SQLUtil.toSQL(fsClientID) +
+                    ", sMobileNo = " + SQLUtil.toSQL(fsMobileNo) +
+                    ", sRemarksx = ''" +
+                    ", sReferNox = " + SQLUtil.toSQL(fsTransNox) +
+                    ", sSourceCd = " + SQLUtil.toSQL(SOURCECD)+
+                    ", sApprovCd = ''" +
+                    ", cTranStat = '0'" +
+                    ", sAgentIDx = ''" +
+                    ", dCallStrt = NULL" +
+                    ", dCallEndx = NULL" +
+                    ", nNoRetryx = 0" +
+                    ", cSubscrbr = " + SQLUtil.toSQL(lsNetwork) +
+                    ", cTLMStatx = ''" +
+                    ", cSMSStatx = '0'" +
+                    ", nSMSSentx = 0" +
+                    ", sModified = " + SQLUtil.toSQL(instance.getUserID()) +
+                    ", dModified = " + SQLUtil.toSQL(instance.getServerDate());
+        else
+            return "INSERT INTO Call_Outgoing SET" +
+                    "  sTransNox = " + SQLUtil.toSQL(MiscUtil.getNextCode("Call_Outgoing", "sTransNox", true, instance.getConnection(), instance.getBranchCode())) +
+                    ", dTransact = " + SQLUtil.toSQL(instance.getServerDate())+
+                    ", sClientID = " + SQLUtil.toSQL(fsClientID) +
+                    ", sMobileNo = " + SQLUtil.toSQL(fsMobileNo) +
+                    ", sRemarksx = ''" +
+                    ", sReferNox = " + SQLUtil.toSQL(fsTransNox) +
+                    ", sSourceCd = " + SQLUtil.toSQL(SOURCECD)+
+                    ", sApprovCd = ''" +
+                    ", cTranStat = '1'" +
+                    ", sAgentIDx = " + SQLUtil.toSQL(lsAgentIDx) +
+                    ", dCallStrt = NULL" +
+                    ", dCallEndx = NULL" +
+                    ", nNoRetryx = 0" +
+                    ", cSubscrbr = " + SQLUtil.toSQL(lsNetwork) +
+                    ", cTLMStatx = ''" +
+                    ", cSMSStatx = '0'" +
+                    ", nSMSSentx = 0" +
+                    ", sModified = " + SQLUtil.toSQL(instance.getUserID()) +
+                    ", dModified = " + SQLUtil.toSQL(instance.getServerDate());
     }
     
     private String getSQ_Master(){
+//        return "SELECT" +
+//                    "  a.sTransNox" +
+//                    ", a.dAppliedx" +
+//                    ", a.sClientID" + 
+//                    ", b.sCompnyNm" +
+//                    ", b.sMobileNo" +
+//                    ", a.sQMatchNo" +
+//                    ", c.sTransNox" +
+//                " FROM MC_Credit_Application a" +
+//                    " LEFT JOIN Client_Master b" +
+//                        " ON a.sClientID = b.sClientID" +
+//                    " LEFT JOIN MC_SO_Master c" +
+//                        " ON c.sTransNox LIKE CONCAT(LEFT(a.sTransNox, 4), '%')" +
+//                            " AND c.dTransact >= a.dAppliedx" +
+//                            " AND c.cPaymForm = '2'" +
+//                            " AND c.cTranStat NOT IN ('3', '7')" +
+//                            " AND a.sTransNox = c.sApplicNo" +
+//                " WHERE  a.cTranStat = '2'" +
+//                    " AND a.cTLMStatx = '0'" +
+//                    " AND LEFT(a.sQMatchNo, 2) = 'CI'" +
+//                    " AND a.dAppliedx >= " + SQLUtil.toSQL(START_DATE) +
+//                    " AND a.dAppliedx <= " + SQLUtil.toSQL(MiscUtil.dateAdd(instance.getServerDate(), DELAY)) + 
+//                    " AND a.sTransNox NOT IN (" +
+//                        "SELECT sReferNox FROM Call_Outgoing" +
+//                        " WHERE sSourceCd = " + SQLUtil.toSQL(SOURCECD) + ")" + 
+//                " HAVING ISNULL(c.sTransNox)" +
+//                " ORDER BY a.dAppliedx";
         return "SELECT" +
                     "  a.sTransNox" +
                     ", a.dAppliedx" +
@@ -232,25 +283,36 @@ public class TLM_CA implements UtilityValidator{
                     ", b.sCompnyNm" +
                     ", b.sMobileNo" +
                     ", a.sQMatchNo" +
-                    ", c.sTransNox" +
                 " FROM MC_Credit_Application a" +
                     " LEFT JOIN Client_Master b" +
                         " ON a.sClientID = b.sClientID" +
-                    " LEFT JOIN MC_SO_Master c" +
-                        " ON c.sTransNox LIKE CONCAT(LEFT(a.sTransNox, 4), '%')" +
-                            " AND c.dTransact >= a.dAppliedx" +
-                            " AND c.cPaymForm = '2'" +
-                            " AND c.cTranStat NOT IN ('3', '7')" +
-                            " AND a.sTransNox = c.sApplicNo" +
                 " WHERE  a.cTranStat = '2'" +
                     " AND a.cTLMStatx = '0'" +
                     " AND LEFT(a.sQMatchNo, 2) = 'CI'" +
                     " AND a.dAppliedx >= " + SQLUtil.toSQL(START_DATE) +
                     " AND a.dAppliedx <= " + SQLUtil.toSQL(MiscUtil.dateAdd(instance.getServerDate(), DELAY)) + 
-                    " AND a.sTransNox NOT IN (" +
-                        "SELECT sReferNox FROM Call_Outgoing" +
-                        " WHERE sSourceCd = " + SQLUtil.toSQL(SOURCECD) + ")" + 
-                " HAVING ISNULL(c.sTransNox)" +
+                    " AND (IFNULL(dFollowUp, '1900-01-01') = '1900-01-01'" + 
+                            " OR dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
+                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" +
                 " ORDER BY a.dAppliedx";
+    }
+    
+    //get the last agent called the transaction
+    private String getAgentIDx(String fsSourceCD, String fsReferNox){
+        String lsSQL = "SELECT sAgentIDx FROM Call_Outgoing" +
+                        " WHERE sSourceCd = " + SQLUtil.toSQL(fsSourceCD) +
+                            " AND sReferNox = " + SQLUtil.toSQL(fsReferNox) +
+                            " AND cTranStat = '2'" +
+                        " ORDER BY sTransNox DESC LIMIT 1";
+        
+        ResultSet loRS = instance.executeQuery(lsSQL);
+        
+        try {
+            if (loRS.next())
+                return loRS.getString("sAgentIDx");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return "";
     }
 }

@@ -1,15 +1,11 @@
-package org.rmj.mis.util;
+package org.rmj.mis.util.notification;
 
-import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
-import org.rmj.mis.util.sms.FUPYMT;
-import org.rmj.mis.util.sms.iSMS;
 import org.rmj.replication.utility.LogWrapper;
 
-public class remP {
+public class BranchOpeningUtil {
     public static void main(String [] args){        
-        LogWrapper logwrapr = new LogWrapper("remP", "css.log");
-        logwrapr.info("Start of Process!");
+        LogWrapper logwrapr = new LogWrapper("BranchOpeningUtil", "branch-opening.log");
         
         String path;
         if(System.getProperty("os.name").toLowerCase().contains("win")){
@@ -28,15 +24,15 @@ public class remP {
             System.exit(1);
         }
         
-        iSMS processor = new FUPYMT();
+        BranchOpening processor = new BranchOpening();        
         processor.setGRider(instance);
-        if (!processor.Process()){
+        
+        if (args.length == 1) processor.setBranchCode(args[0]);
+        
+        if (!processor.Run()){
             logwrapr.severe(processor.getMessage());
             System.exit(1);
         }
-            
-        logwrapr.info(processor.getItemCount() + " messages was created for " + SQLUtil.dateFormat(instance.getServerDate(), SQLUtil.FORMAT_SHORT_DATE) + 
-                        " with " + processor.getInvalid() + " invalid mobile numbers.");
         System.exit(0);
     }
 }

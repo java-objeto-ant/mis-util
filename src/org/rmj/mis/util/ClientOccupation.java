@@ -1,14 +1,13 @@
 package org.rmj.mis.util;
 
-import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.agent.GRiderX;
 import org.rmj.mis.util.factory.UtilityValidator;
 import org.rmj.mis.util.factory.UtilityValidatorFactory;
 import org.rmj.replication.utility.LogWrapper;
 
-public class ClientAccounts {
-    public static void main (String [] args){
-        LogWrapper logwrapr = new LogWrapper("Client.Utility", "clients.log");
+public class ClientOccupation {
+    public static void main(String [] args){
+        LogWrapper logwrapr = new LogWrapper("Occupation.Utility", "clients.log");
         logwrapr.info("Start of Process!");
         
         String path;
@@ -16,11 +15,13 @@ public class ClientAccounts {
             path = "D:/GGC_Java_Systems";
         }
         else{
-            path = "/srv/mac/GGC_Java_Systems";
+            path = "/srv/GGC_Java_Systems";
         }
         System.setProperty("sys.default.path.config", path);
         
         GRiderX instance = new GRiderX("gRider");
+        
+        instance.logUser("gRider", "M001111122");
         
         if(!instance.getErrMsg().isEmpty()){
             System.err.println(instance.getMessage() + instance.getErrMsg());
@@ -30,8 +31,8 @@ public class ClientAccounts {
         
         UtilityValidator utility;
         
-        //process API Payments
-        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.API_PAYMENTS);
+        //process applicant occupation discrepancy
+        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.CLIENT_OCCUPATION);
         utility.setGRider(instance);
         
         if (!utility.Run()){
@@ -39,25 +40,5 @@ public class ClientAccounts {
             logwrapr.severe(utility.getMessage());
             System.exit(1);
         }
-        
-        //process Client Mobile
-        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.CLIENT_MOBILE);
-        utility.setGRider(instance);
-        
-        if (!utility.Run()){
-            System.err.println(utility.getMessage());
-            logwrapr.severe(utility.getMessage());
-            System.exit(1);
-        }
-        
-        //close connection
-        instance.logoutUser();
-        MiscUtil.close(instance.getConnection());
-        
-        
-        System.out.println("Thank you!");
-        logwrapr.info("Thank you!");
-        //return success
-        System.exit(0); 
     }
 }

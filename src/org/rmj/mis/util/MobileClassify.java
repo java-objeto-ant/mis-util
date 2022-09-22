@@ -5,9 +5,9 @@ import org.rmj.mis.util.factory.UtilityValidator;
 import org.rmj.mis.util.factory.UtilityValidatorFactory;
 import org.rmj.replication.utility.LogWrapper;
 
-public class TLMAccounts {
+public class MobileClassify {
     public static void main(String [] args){
-        LogWrapper logwrapr = new LogWrapper("TLM.Utility", "tlm.log");
+        LogWrapper logwrapr = new LogWrapper("MobileClassify", "tlm.log");
         logwrapr.info("Start of Process!");
         
         String path;
@@ -30,37 +30,6 @@ public class TLMAccounts {
         UtilityValidator utility;
         
         //process TLM Primary Leads
-        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_PRIMARY_LEADS);
-        utility.setGRider(instance);
-        
-        if (!utility.Run()){
-            System.err.println(utility.getMessage());
-            logwrapr.severe(utility.getMessage());
-            System.exit(1);
-        } 
-        
-        
-        //process TLM Leads from approved credit applications
-        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_CA_LEADS);
-        utility.setGRider(instance);
-        
-        if (!utility.Run()){
-            System.err.println(utility.getMessage());
-            logwrapr.severe(utility.getMessage());
-            System.exit(1);
-        }
-        
-        //process TLM Leads from MC Sales
-        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_MCSO_AS_MP_LEADS);
-        utility.setGRider(instance);
-        
-        if (!utility.Run()){
-            System.err.println(utility.getMessage());
-            logwrapr.severe(utility.getMessage());
-            System.exit(1);
-        } 
-        
-        //classify client mobile
         utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.CLASSIFY_MOBILE);
         utility.setGRider(instance);
         
@@ -68,7 +37,7 @@ public class TLMAccounts {
             System.err.println(utility.getMessage());
             logwrapr.severe(utility.getMessage());
             System.exit(1);
-        }    
+        }         
         
         System.out.println("Thank you!");
         logwrapr.info("Thank you!");

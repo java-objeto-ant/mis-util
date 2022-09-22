@@ -64,7 +64,8 @@ class Supersesion{
                             ", sBarrCode" + 
                             ", sReplacID" + 
                         " FROM Spareparts" + 
-                        " WHERE IFNULL(sReplacID, '') <> ''";
+                        " WHERE IFNULL(sReplacID, '') <> ''" +
+                            " AND (`sReplacID` NOT LIKE 'M0%' AND `sReplacID` NOT LIKE 'GC%')";
         
         ResultSet loRS = oApp.executeQuery(lsSQL);
         ResultSet loRSx;

@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import org.json.simple.JSONObject;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
@@ -70,12 +71,19 @@ public class FUPYMT implements iSMS{
             
             loRS = oApp.executeQuery(lsSQL);
             
+            JSONObject loJSON;
             String lsMessagex;
             String lsMobileNo;
             
             oApp.beginTrans();
             while(loRS.next()){
-                lsMessagex = getIndvidualMessage(loRS.getString("sFrstName"), loRS.getString("dFirstPay"), loRS.getString("xMgrFName"), loRS.getString("xMgrTelNo"), loRS.getString("xMgrCelNo"));
+                loJSON = getManagerInfo(loRS.getString("sBranchCd"));
+                
+                if (loJSON != null)
+                    lsMessagex = getIndvidualMessage(loRS.getString("sFrstName"), loRS.getString("dFirstPay"), (String) loJSON.get("name"), "", (String) loJSON.get("mobile"));
+                else
+                    lsMessagex = getIndvidualMessage(loRS.getString("sFrstName"), loRS.getString("dFirstPay"), loRS.getString("xMgrFName"), loRS.getString("xMgrTelNo"), loRS.getString("xMgrCelNo"));
+                
                 lsMobileNo = CommonUtils.fixMobileNo(loRS.getString("sMobileNo"));
                 
                 if (!lsMobileNo.isEmpty()){
@@ -190,10 +198,10 @@ public class FUPYMT implements iSMS{
     private String getSQ_Master(){
         String lsSQL = "SELECT" +
                             " dTransact" +
-                         " FROM HotLine_Outgoing" +
-                         " WHERE sSourceCd = " + SQLUtil.toSQL(SOURCECD) +
-                         " ORDER BY dTransact DESC" +
-                         " LIMIT 1";
+                        " FROM HotLine_Outgoing" +
+                        " WHERE sSourceCd = " + SQLUtil.toSQL(SOURCECD) +
+                        " ORDER BY dTransact DESC" +
+                        " LIMIT 1";
         
         ResultSet loRS = oApp.executeQuery(lsSQL);
         
@@ -254,6 +262,7 @@ public class FUPYMT implements iSMS{
             
             lsSQL = "SELECT" +
                         "  sAcctNmbr" +
+                        ", sBranchCd" +
                         ", sLastName" +
                         ", sFrstName" +
                         ", sPhoneNox" +
@@ -267,6 +276,7 @@ public class FUPYMT implements iSMS{
                     " FROM ( " +
                         "SELECT" +
                             "  a.sAcctNmbr" +
+                            ", a.sBranchCd" +
                             ", b.sLastName" +
                             ", b.sFrstName" +
                             ", b.sPhoneNox" +
@@ -299,6 +309,7 @@ public class FUPYMT implements iSMS{
                             " AND (LENGTH(b.sMobileNo) >= 11 OR LENGTH(b.sPhoneNox) >= 11)" +
                         " UNION SELECT" +
                             "  a.sAcctNmbr" +
+                            ", a.sBranchCd" +
                             ", b.sLastName" +
                             ", b.sFrstName" +
                             ", b.sPhoneNox" +
@@ -331,6 +342,7 @@ public class FUPYMT implements iSMS{
                             " AND (LENGTH(b.sMobileNo) >= 11 OR LENGTH(b.sPhoneNox) >= 11)" +
                         " UNION SELECT" +
                             "  a.sAcctNmbr" +
+                            ", a.sBranchCd" +
                             ", '' sLastName" +
                             ", '' sFrstName" +
                             ", '' sPhoneNox" +
@@ -359,6 +371,7 @@ public class FUPYMT implements iSMS{
                             " AND DATE_FORMAT(c.dCheckDte, " + SQLUtil.toSQL("%Y%m") + ") <= " + SQLUtil.toSQL(SQLUtil.dateFormat(ldStart, "yyyyMM")) +
                         " UNION SELECT" +
                             "  a.sAcctNmbr" +
+                            ", a.sBranchCd" +
                             ", '' sLastName" +
                             ", '' sFrstName" +
                             ", '' sPhoneNox" +
@@ -395,5 +408,27 @@ public class FUPYMT implements iSMS{
         }
         
         return lsSQL;
+    }
+    
+    private JSONObject getManagerInfo(String fsBranchCd) throws SQLException{
+        String lsSQL = "SELECT" +
+                            "  b.sFrstName" +
+                            ", IFNULL(IFNULL(b.sMobileNo, b.sPhoneNox), '') sMobileNo" +
+                        " FROM Employee_Master001 a" +
+                            ", Client_Master b" +
+                        " WHERE a.sEmployID = b.sClientID" +
+                            " AND a.sPositnID IN ('009', '031')" +
+                            " AND a.sPyBranch = " + SQLUtil.toSQL(fsBranchCd) +
+                            " AND a.cRecdStat = '1'";
+        
+        ResultSet loRS = oApp.executeQuery(lsSQL);
+        
+        if (loRS.next()){
+            JSONObject loJSON = new JSONObject();
+            loJSON.put("name", loRS.getString("sFrstName"));
+            loJSON.put("mobile", loRS.getString("sMobileNo"));
+            
+            return loJSON;
+        } else return null;
     }
 }
