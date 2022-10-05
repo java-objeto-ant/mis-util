@@ -8,10 +8,10 @@ import org.rmj.appdriver.agentfx.StringHelper;
 
 /**
  * @author mac
- * @since 2022.09.30
+ * @since 2022.10.04
  */
-public class ExtractMCSales extends ExtractMPSales{
-    private final String SOURCECD = "MCSl";
+public class ExtractPR extends ExtractMPSales{
+    private final String SOURCECD = "PRxx";
     
     @Override
     public boolean Run() {
@@ -34,7 +34,7 @@ public class ExtractMCSales extends ExtractMPSales{
             
             while (loRS.next()){
                 //ilan ang ibibigay na raffle entry?
-                lnNoEntryx = getEntryNo(loRS.getDouble("nTranAmtx"));
+                lnNoEntryx = getEntryNo(loRS.getDouble("nTranAmtx"), loRS.getDouble("nDiscount"), loRS.getDouble("nMonAmort"));
                 lnRandNmbr = MiscUtil.getRandom(0, 99); 
                 
                 if (lnNoEntryx > 0){
@@ -68,8 +68,8 @@ public class ExtractMCSales extends ExtractMPSales{
                                 ", sSourceCd = " + SQLUtil.toSQL(SOURCECD) +
                                 ", sSourceNo = " + SQLUtil.toSQL(loRS.getString("sTransNox")) +
                                 ", sReferNox = " + SQLUtil.toSQL(loRS.getString("sReferNox")) +
-                                ", sAcctNmbr = ''" +
-                                ", sClientID = " + SQLUtil.toSQL(loRS.getString("sClientID")) + 
+                                ", sAcctNmbr = " + SQLUtil.toSQL(loRS.getString("sAcctNmbr")) +
+                                ", sClientID = " + SQLUtil.toSQL(loRS.getString("sClientID")) +
                                 ", sMobileNo = " + SQLUtil.toSQL(loRS.getString("sMobileNo")) +
                                 ", cDivision = " + SQLUtil.toSQL(lsDivision) +
                                 ", sRandomNo = " + SQLUtil.toSQL(StringHelper.prepad(String.valueOf(lnRandNmbr), 2, '0')) +
@@ -93,45 +93,50 @@ public class ExtractMCSales extends ExtractMPSales{
         return true;
     }
     
-    @Override
-    protected int getEntryNo(double fnTranAmtx){
-        return 5;
+    private int getEntryNo(double fnTranAmtx, double fnDiscount, double fnMonAmort){
+        return (int) Math.round((fnTranAmtx + fnDiscount) / fnMonAmort);
     }
     
     @Override
     protected String getSQ_Master(){
         return "SELECT" + 
-                    " a.sTransNox" +
+                    "  a.sTransNox" +
                     ", b.sTransNox sRaffleID" +
                     ", a.dTransact" +
                     ", LEFT(a.sTransNox, 4) sBranchCd" +
-                    ", a.sClientID" +
+                    ", a.sAcctNmbr" +
                     ", c.sMobileNo" +
-                    ", a.sDRNoxxxx sReferNox" +
-                    ", 'MCSl' sSourceCD" +
+                    ", a.sPRNoxxxx sReferNox" +
+                    ", 'PRxx' sSourceCd" +
                     ", '0' cRaffledx" +
                     ", a.sModified" +
                     ", a.dModified" +
-                    ", a.nAmtPaidx nTranAmtx" + 
-                " FROM MC_SO_Master a" + 
-                    " LEFT JOIN MC_SO_Detail d" + 
-                        " ON a.sTransNox = d.sTransNox" + 
+                    ", a.nTranAmtx" +
+                    ", a.nDiscount" +
+                    ", e.nMonAmort" +
+                " FROM Provisionary_Receipt_Master a" + 
                     " LEFT JOIN Raffle_With_SMS_Source b" + 
-                        " ON LEFT(a.sTransNox, 4) = b.sBranchCd" + 
-                            " AND a.sTransNox = b.sSourceNo" + 
+                        " ON LEFT(a.sTransNox, 4) = b.sBranchCD" + 
+                            " AND a.sTransNox = b.sSourceNo" +
                             " AND b.sSourceCd = " + SQLUtil.toSQL(SOURCECD) +
                     " LEFT JOIN Client_Master c" + 
                         " ON a.sClientID = c.sClientID" + 
-                    " LEFT JOIN Employee_Master001 e" + 
-                        " ON a.sClientID = e.sEmployID" + 
+                    " LEFT JOIN Employee_Master001 d" + 
+                        " ON a.sClientID = d.sEmployID" + 
+                    " LEFT JOIN MC_AR_Master e" + 
+                        " ON a.sAcctNmbr = e.sAcctNmbr" + 
+                    " LEFT JOIN Checks_Received f" + 
+                        " ON a.sTransNox = f.sReferNox" + 
+                            " AND f.sSourceCD = 'PRec'" + 
                 " WHERE a.sTransNox LIKE " + SQLUtil.toSQL(sBranchCd + "%")+ 
                     " AND a.dTransact BETWEEN " + SQLUtil.toSQL(FROM_DATE) + " AND " + SQLUtil.toSQL(THRU_DATE) +
-                    " AND d.sSerialID <> ''" + 
-                    " AND d.cMotorNew = '1'" + 
+                    " AND a.cTranType = '1'" + 
                     " AND NOT (a.cTranStat & '3' = 3)" + 
-                    " AND e.sEmployID IS NULL" + 
+                    " AND d.sEmployID IS NULL" + 
                     " AND b.sTransNox IS NULL" + 
+                    " AND IFNULL(e.nMonAmort, 0) > 0" + 
                     " AND LENGTH(c.sMobileNo) BETWEEN 11 AND 13" + 
+                    " AND f.sTransNox IS NULL" + 
                 " ORDER BY dTransact, sReferNox";
     }
 }

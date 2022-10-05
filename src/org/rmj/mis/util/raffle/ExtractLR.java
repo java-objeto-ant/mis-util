@@ -11,7 +11,7 @@ import org.rmj.appdriver.agentfx.StringHelper;
  * @since 2022.09.30
  */
 public class ExtractLR extends ExtractMPSales{
-    private final String SOURCECD = "OFCG";
+    private final String SOURCECD = "LRxx";
     
     @Override
     public boolean Run() {
@@ -63,7 +63,7 @@ public class ExtractLR extends ExtractMPSales{
                     
                     lsSQL = "INSERT INTO Raffle_With_SMS_Source SET" +
                                 "  sTransNox = " + SQLUtil.toSQL(lsTransNox) +
-                                ", dTransact = " + SQLUtil.toSQL(instance.getServerDate()) +
+                                ", dTransact = " + SQLUtil.toSQL(loRS.getString("dTransact")) +
                                 ", sBranchCd = " + SQLUtil.toSQL(sBranchCd) +
                                 ", sSourceCd = " + SQLUtil.toSQL(SOURCECD) +
                                 ", sSourceNo = " + SQLUtil.toSQL(loRS.getString("sTransNox")) +
@@ -108,7 +108,7 @@ public class ExtractLR extends ExtractMPSales{
                     ", a.sAcctNmbr" +
                     ", c.sMobileNo" +
                     ", a.sReferNox sReferNox" +
-                    ", 'OFCG' sSourceCd" +
+                    ", 'LRxx' sSourceCd" +
                     ", '0' cRaffledx" +
                     ", a.sModified" +
                     ", a.dModified" +
