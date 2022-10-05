@@ -92,7 +92,7 @@ public class ExtractMPSales implements RaffleValidator{
                     
                     lsSQL = "INSERT INTO Raffle_With_SMS_Source SET" +
                                 "  sTransNox = " + SQLUtil.toSQL(lsTransNox) +
-                                ", dTransact = " + SQLUtil.toSQL(instance.getServerDate()) +
+                                ", dTransact = " + SQLUtil.toSQL(loRS.getString("dTransact")) +
                                 ", sBranchCd = " + SQLUtil.toSQL(sBranchCd) +
                                 ", sSourceCd = " + SQLUtil.toSQL(SOURCECD) +
                                 ", sSourceNo = " + SQLUtil.toSQL(loRS.getString("sTransNox")) +

@@ -8,10 +8,10 @@ import org.rmj.appdriver.agentfx.StringHelper;
 
 /**
  * @author mac
- * @since 2022.09.30
+ * @since 2022.10.03
  */
-public class ExtractMCSales extends ExtractMPSales{
-    private final String SOURCECD = "MCSl";
+public class ExtractSPSales extends ExtractMPSales{
+    private final String SOURCECD = "SPSl";
     
     @Override
     public boolean Run() {
@@ -95,29 +95,27 @@ public class ExtractMCSales extends ExtractMPSales{
     
     @Override
     protected int getEntryNo(double fnTranAmtx){
-        return 5;
+        return fnTranAmtx >= 200.00 ? 1 : 0;
     }
     
     @Override
     protected String getSQ_Master(){
-        return "SELECT" + 
-                    " a.sTransNox" +
+        return "SELECT" +
+                    "  a.sTransNox" +
                     ", b.sTransNox sRaffleID" +
                     ", a.dTransact" +
                     ", LEFT(a.sTransNox, 4) sBranchCd" +
                     ", a.sClientID" +
                     ", c.sMobileNo" +
-                    ", a.sDRNoxxxx sReferNox" +
-                    ", 'MCSl' sSourceCD" +
+                    ", a.sSalesInv sReferNox" +
+                    ", 'SPSl' sSourceCd" +
                     ", '0' cRaffledx" +
                     ", a.sModified" +
                     ", a.dModified" +
-                    ", a.nAmtPaidx nTranAmtx" + 
-                " FROM MC_SO_Master a" + 
-                    " LEFT JOIN MC_SO_Detail d" + 
-                        " ON a.sTransNox = d.sTransNox" + 
+                    ", a.nAmtPaidx nTranAmtx" +
+                " FROM SP_SO_Master a" + 
                     " LEFT JOIN Raffle_With_SMS_Source b" + 
-                        " ON LEFT(a.sTransNox, 4) = b.sBranchCd" + 
+                        " ON LEFT(a.sTransNox, 4) = b.sBranchCD" + 
                             " AND a.sTransNox = b.sSourceNo" + 
                             " AND b.sSourceCd = " + SQLUtil.toSQL(SOURCECD) +
                     " LEFT JOIN Client_Master c" + 
@@ -126,11 +124,11 @@ public class ExtractMCSales extends ExtractMPSales{
                         " ON a.sClientID = e.sEmployID" + 
                 " WHERE a.sTransNox LIKE " + SQLUtil.toSQL(sBranchCd + "%")+ 
                     " AND a.dTransact BETWEEN " + SQLUtil.toSQL(FROM_DATE) + " AND " + SQLUtil.toSQL(THRU_DATE) +
-                    " AND d.sSerialID <> ''" + 
-                    " AND d.cMotorNew = '1'" + 
                     " AND NOT (a.cTranStat & '3' = 3)" + 
                     " AND e.sEmployID IS NULL" + 
-                    " AND b.sTransNox IS NULL" + 
+                    " AND b.sTransNox IS NULL" +
+                    " AND a.sSalesInv <> ''" + 
+                    " AND a.nAmtPaidx >= 200" + 
                     " AND LENGTH(c.sMobileNo) BETWEEN 11 AND 13" + 
                 " ORDER BY dTransact, sReferNox";
     }
