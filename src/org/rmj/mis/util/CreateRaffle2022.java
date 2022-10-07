@@ -38,93 +38,113 @@ public class CreateRaffle2022 {
         
         try {
             while (loRS.next()){
-                //process motorcycle sales
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.MOTORCYCLE_SALES);
-                utility.setGRider(instance);
-                utility.setBranch(loRS.getString("sBranchCd"));
-
-                if (!utility.Run()){
-                    System.err.println(utility.getMessage());
-                    logwrapr.severe(utility.getMessage());
-                    System.exit(1);
-                } 
-
-                //process mobile phone sales
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.MOBILE_PHONE_SALES);
-                utility.setGRider(instance);
-                utility.setBranch(loRS.getString("sBranchCd"));
-
-                if (!utility.Run()){
-                    System.err.println(utility.getMessage());
-                    logwrapr.severe(utility.getMessage());
-                    System.exit(1);
-                } 
-
-                //process spareparts sales
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.SPAREPARTS_SALES);
-                utility.setGRider(instance);
-                utility.setBranch(loRS.getString("sBranchCd"));
-
-                if (!utility.Run()){
-                    System.err.println(utility.getMessage());
-                    logwrapr.severe(utility.getMessage());
-                    System.exit(1);
-                } 
-
-                //process lr payment
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.LR_PAYMENT);
-                utility.setGRider(instance);
-                utility.setBranch(loRS.getString("sBranchCd"));
-
-                if (!utility.Run()){
-                    System.err.println(utility.getMessage());
-                    logwrapr.severe(utility.getMessage());
-                    System.exit(1);
-                } 
-
-                //process lr payment pr
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.LR_PAYMENT_PR);
-                utility.setGRider(instance);
-                utility.setBranch(loRS.getString("sBranchCd"));
-
-                if (!utility.Run()){
-                    System.err.println(utility.getMessage());
-                    logwrapr.severe(utility.getMessage());
-                    System.exit(1);
-                } 
-
-                //process or payment
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.OFFICIAL_RECEIPT);
-                utility.setGRider(instance);
-                utility.setBranch(loRS.getString("sBranchCd"));
-
-                if (!utility.Run()){
-                    System.err.println(utility.getMessage());
-                    logwrapr.severe(utility.getMessage());
-                    System.exit(1);
-                } 
-
-                //process pr payment
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.PROVISIONARY_RECEIPT);
-                utility.setGRider(instance);
-                utility.setBranch(loRS.getString("sBranchCd"));
-
-                if (!utility.Run()){
-                    System.err.println(utility.getMessage());
-                    logwrapr.severe(utility.getMessage());
-                    System.exit(1);
-                } 
-                
-                //process pr payment
-                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.NOTIFIER);
+//                //process motorcycle sales
+//                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.MOTORCYCLE_SALES);
+//                utility.setGRider(instance);
+//                utility.setBranch(loRS.getString("sBranchCd"));
+//
+//                if (!utility.Run()){
+//                    System.err.println(utility.getMessage());
+//                    logwrapr.severe(utility.getMessage());
+//                    System.exit(1);
+//                } 
+//
+//                //process mobile phone sales
+//                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.MOBILE_PHONE_SALES);
+//                utility.setGRider(instance);
+//                utility.setBranch(loRS.getString("sBranchCd"));
+//
+//                if (!utility.Run()){
+//                    System.err.println(utility.getMessage());
+//                    logwrapr.severe(utility.getMessage());
+//                    System.exit(1);
+//                } 
+//
+//                //process spareparts sales
+//                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.SPAREPARTS_SALES);
+//                utility.setGRider(instance);
+//                utility.setBranch(loRS.getString("sBranchCd"));
+//
+//                if (!utility.Run()){
+//                    System.err.println(utility.getMessage());
+//                    logwrapr.severe(utility.getMessage());
+//                    System.exit(1);
+//                } 
+//
+//                //process lr payment
+//                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.LR_PAYMENT);
+//                utility.setGRider(instance);
+//                utility.setBranch(loRS.getString("sBranchCd"));
+//
+//                if (!utility.Run()){
+//                    System.err.println(utility.getMessage());
+//                    logwrapr.severe(utility.getMessage());
+//                    System.exit(1);
+//                } 
+//
+//                //process lr payment pr
+//                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.LR_PAYMENT_PR);
+//                utility.setGRider(instance);
+//                utility.setBranch(loRS.getString("sBranchCd"));
+//
+//                if (!utility.Run()){
+//                    System.err.println(utility.getMessage());
+//                    logwrapr.severe(utility.getMessage());
+//                    System.exit(1);
+//                } 
+//
+//                //process or payment
+//                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.OFFICIAL_RECEIPT);
+//                utility.setGRider(instance);
+//                utility.setBranch(loRS.getString("sBranchCd"));
+//
+//                if (!utility.Run()){
+//                    System.err.println(utility.getMessage());
+//                    logwrapr.severe(utility.getMessage());
+//                    System.exit(1);
+//                } 
+//
+//                //process pr payment
+//                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.PROVISIONARY_RECEIPT);
+//                utility.setGRider(instance);
+//                utility.setBranch(loRS.getString("sBranchCd"));
+//
+//                if (!utility.Run()){
+//                    System.err.println(utility.getMessage());
+//                    logwrapr.severe(utility.getMessage());
+//                    System.exit(1);
+//                } 
+            }
+            
+            //process other division
+                utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.OTHER_DIVISION);
                 utility.setGRider(instance);                
 
                 if (!utility.Run()){
                     System.err.println(utility.getMessage());
                     logwrapr.severe(utility.getMessage());
                     System.exit(1);
-                } 
-            }
+                }
+                
+            //process notifier
+            utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.NOTIFIER);
+            utility.setGRider(instance);                
+
+            if (!utility.Run()){
+                System.err.println(utility.getMessage());
+                logwrapr.severe(utility.getMessage());
+                System.exit(1);
+            } 
+            
+            //process feedback
+            utility = RaffleValidatorFactory.make(RaffleValidatorFactory.UtilityType.FEEDBACK);
+            utility.setGRider(instance);                
+
+            if (!utility.Run()){
+                System.err.println(utility.getMessage());
+                logwrapr.severe(utility.getMessage());
+                System.exit(1);
+            } 
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             logwrapr.severe(e.getMessage());
