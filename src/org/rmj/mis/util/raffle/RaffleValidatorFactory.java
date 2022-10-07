@@ -9,6 +9,7 @@ public class RaffleValidatorFactory {
         LR_PAYMENT_PR,
         OFFICIAL_RECEIPT,
         PROVISIONARY_RECEIPT,
+        OTHER_DIVISION,
         NOTIFIER,
         FEEDBACK
     }
@@ -33,6 +34,8 @@ public class RaffleValidatorFactory {
                 return new RaffleNotify();
             case FEEDBACK:
                 return new RaffleFeedback();
+            case OTHER_DIVISION:
+                return new ExtractOtherDivision();
             default:
                 return null;
         }

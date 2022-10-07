@@ -11,10 +11,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
-import org.rmj.appdriver.StringHelperMisc;
 import org.rmj.appdriver.agent.GRiderX;
 import org.rmj.appdriver.agentfx.CommonUtils;
-import org.rmj.appdriver.agentfx.StringHelper;
 import org.rmj.appdriver.agentfx.WebClient;
 
 /**
@@ -96,6 +94,30 @@ public class RaffleFeedback implements RaffleValidator{
                                     " Thank you for patronizing us.";
                             
                             boolean lbSent = sendMessage("GUANZON", "09176340516", lsSQL);
+
+                            lsSQL = "INSERT INTO HotLine_Outgoing SET" +
+                                    "  sTransNox = " + SQLUtil.toSQL(MiscUtil.getNextCode("HotLine_Outgoing", "sTransNox", true, instance.getConnection(), instance.getBranchCode())) +
+                                    ", dTransact = " + SQLUtil.toSQL(instance.getServerDate()) +
+                                    ", sDivision = 'MIS'" +
+                                    ", sMobileNo = " + SQLUtil.toSQL("09176340516") +
+                                    ", sMessagex = " + SQLUtil.toSQL(lsSQL) +
+                                    ", cSubscrbr = " + SQLUtil.toSQL(CommonUtils.classifyNetwork("09176340516")) +
+                                    ", dDueUntil = " + SQLUtil.toSQL(instance.getServerDate()) +
+                                    ", cSendStat = '2'" +
+                                    ", nNoRetryx = '1'" +
+                                    ", sUDHeader = ''" +
+                                    ", sReferNox = " + SQLUtil.toSQL(loRS1.getString("sSourceNo")) +
+                                    ", sSourceCd = " + SQLUtil.toSQL(loRS1.getString("sSourceCd")) +
+                                    ", cTranStat = " + SQLUtil.toSQL(lbSent ? "1" : "0") +
+                                    ", nPriority = 1" +
+                                    ", sModified = " + SQLUtil.toSQL(instance.getUserID()) +
+                                    ", dModified = " + SQLUtil.toSQL(instance.getServerDate());
+                            
+                            if (instance.executeUpdate(lsSQL) <= 0){
+                                setMessage(instance.getMessage() + "; " + instance.getErrMsg());
+                                instance.rollbackTrans();
+                                return false;
+                            }    
                             
                             if (lbSent){
                                 lsSQL = "UPDATE Raffle_With_SMS_Source SET" +
