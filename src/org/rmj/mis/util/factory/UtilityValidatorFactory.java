@@ -12,7 +12,8 @@ public class UtilityValidatorFactory {
         CLIENT_OCCUPATION,
         MONITORING_BOARD, 
         CLASSIFY_MOBILE,
-        BATCH_SHIFT_MOVEMENT
+        BATCH_SHIFT_MOVEMENT,
+        HOLIDAY_GREETINGS
     }
     
     public static UtilityValidator make(UtilityValidatorFactory.UtilityType foType){
