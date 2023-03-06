@@ -13,8 +13,8 @@ import org.rmj.appdriver.agentfx.CommonUtils;
  */
 
 public class TLM_Leads1 implements UtilityValidator{
-    private final int pxe2Fill = 30;
-    private final int pxePriorityFill = 25;
+    private final int pxe2Fill = 60;
+    private final int pxePriorityFill = 60;
     private final int pxeLastDateInqr = -60;
     private final String pxeInquiry = "2021-05-01";
     
@@ -186,7 +186,7 @@ public class TLM_Leads1 implements UtilityValidator{
                                 " AND @xTransact >= a.dTransact" +  
                                 " AND a.dTargetxx IS NULL" +  
                                 " AND a.dFollowUp IS NULL))" +  
-                    " ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact DESC";
+                    " ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact ASC";
         } else {
             lsSQL = "SELECT" + 
                         "  b.sMobileNo" +
@@ -217,7 +217,7 @@ public class TLM_Leads1 implements UtilityValidator{
                                 " AND @xTransact >= a.dTransact" + 
                                 " AND a.dTargetxx IS NULL" + 
                                 " AND a.dFollowUp IS NULL))" + 
-                        "ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact DESC";
+                        "ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact ASC";
         }
         
         
@@ -254,10 +254,8 @@ public class TLM_Leads1 implements UtilityValidator{
                     " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
                     " AND a.cTranStat = '0'" + 
                     " AND a.sInquiryx <> 'FB'" + 
-                    " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" + 
-                        " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                    " AND ((a.dFollowUp < DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 DAY))" + 
+                        " OR (a.dTargetxx < DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
                             " AND a.dFollowUp IS NULL)" + 
                         " OR (a.sInquiryx = 'WI'" + 
                             " AND @xTransact >= a.dTransact" + 
@@ -387,13 +385,14 @@ public class TLM_Leads1 implements UtilityValidator{
                     " AND b.sClientID = c.sClientID" +
                     " AND b.sMobileNo = c.sMobileNo" +
                     " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
-                    " AND a.cTranStat = '0'" + 
+                    " AND IFNULL(a.cTranStat, '0') = '0'" + 
+                    " AND a.sClassIDx = '0001'" +
                     " AND a.cSourceCd = 'MP'" + 
                     " AND (a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
                        " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
                        " OR a.dFollowUp IS NULL)";
 
-        lsSQL += " ORDER BY dFollowUp DESC, dTargetxx DESC, dTransact DESC LIMIT 100";
+        lsSQL += " ORDER BY dFollowUp DESC, dTargetxx DESC, sTableNme ASC, dTransact ASC LIMIT 300";
         
         ResultSet loRS = instance.executeQuery(lsSQL);
         processLeads(loRS, n2Fill, lcSubScribe);
