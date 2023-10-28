@@ -37,7 +37,7 @@ public class BatchExecute {
         
         instance.beginTrans();
         for (int lnCtr = 0; lnCtr <= loStatement.size()-1; lnCtr++){
-            instance.executeQuery((String) loStatement.get(lnCtr), "", instance.getBranchCode(), "");
+            instance.executeQuery((String) loStatement.get(lnCtr), "Employee_Shift", instance.getBranchCode(), "");
 //            if (instance.executeQuery((String) loStatement.get(lnCtr), "", instance.getBranchCode(), "") <= 0){
 //                instance.rollbackTrans();
 //                logwrapr.severe(instance.getMessage() + instance.getErrMsg());

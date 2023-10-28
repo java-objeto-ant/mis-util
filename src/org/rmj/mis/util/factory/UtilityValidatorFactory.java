@@ -6,6 +6,7 @@ public class UtilityValidatorFactory {
     public enum UtilityType{
         CLIENT_MOBILE,
         API_PAYMENTS,
+        TLM_FIX,
         TLM_PRIMARY_LEADS,
         TLM_MCSO_AS_MP_LEADS,
         TLM_CA_LEADS,
@@ -13,7 +14,9 @@ public class UtilityValidatorFactory {
         MONITORING_BOARD, 
         CLASSIFY_MOBILE,
         BATCH_SHIFT_MOVEMENT,
-        HOLIDAY_GREETINGS
+        HOLIDAY_GREETINGS,
+        GCONNECT,
+        GANADO
     }
     
     public static UtilityValidator make(UtilityValidatorFactory.UtilityType foType){
@@ -22,6 +25,8 @@ public class UtilityValidatorFactory {
                 return new Client_Mobile();
             case API_PAYMENTS:
                 return new API_Payments();
+            case TLM_FIX:
+                return new TLM_Fix();
             case TLM_PRIMARY_LEADS:
                 return new TLM_Leads1();
             case TLM_MCSO_AS_MP_LEADS:
@@ -36,6 +41,10 @@ public class UtilityValidatorFactory {
                 return new Classify_Mobile();
             case BATCH_SHIFT_MOVEMENT:
                 return new Batch_Shift_Movement();
+            case GCONNECT:
+                return new GConnect();
+            case GANADO:
+                return new TLM_Ganado();
             default:
                 return null;
         }

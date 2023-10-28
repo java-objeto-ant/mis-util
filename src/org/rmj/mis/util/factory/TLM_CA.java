@@ -289,7 +289,7 @@ public class TLM_CA implements UtilityValidator{
                 " WHERE  a.cTranStat = '2'" +
                     " AND a.cTLMStatx = '0'" +
                     " AND LEFT(a.sQMatchNo, 2) = 'CI'" +
-                    " AND a.dAppliedx >= " + SQLUtil.toSQL(START_DATE) +
+                    " AND a.dAppliedx >= DATE_SUB(NOW(), INTERVAL 1 MONTH)" +
                     " AND a.dAppliedx <= " + SQLUtil.toSQL(MiscUtil.dateAdd(instance.getServerDate(), DELAY)) + 
                     " AND (IFNULL(dFollowUp, '1900-01-01') = '1900-01-01'" + 
                             " OR dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
