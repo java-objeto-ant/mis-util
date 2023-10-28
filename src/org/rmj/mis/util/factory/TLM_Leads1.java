@@ -13,8 +13,8 @@ import org.rmj.appdriver.agentfx.CommonUtils;
  */
 
 public class TLM_Leads1 implements UtilityValidator{
-    private final int pxe2Fill = 60;
-    private final int pxePriorityFill = 60;
+    private final int pxe2Fill = 30;
+    private final int pxePriorityFill = 30;
     private final int pxeLastDateInqr = -60;
     private final String pxeInquiry = "2021-05-01";
     
@@ -46,6 +46,11 @@ public class TLM_Leads1 implements UtilityValidator{
         lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SUN");
         lnTotal += lnFilled;
+        
+        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
+        System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - DITO");
+        lnTotal += lnFilled;
+        
         System.out.println("System inserted total of " + lnTotal + " facebook inquiries from MC. - ALL NETWORKS");
         
         //top priority MP Facebook Inquiries
@@ -60,24 +65,43 @@ public class TLM_Leads1 implements UtilityValidator{
         
         lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SUN");
-        lnTotal += lnFilled;
+        lnTotal += lnFilled;   
+        
+        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
+        System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - DITO");
+        lnTotal += lnFilled;    
+        
         System.out.println("System inserted total of " + lnTotal + " facebook inquiries from MP. - ALL NETWORKS");
         
-        //other product inquiries
+        //get inquiry only
+        int n2Fill = get2Fill(pxePriorityFill, "3");
+        if (n2Fill > pxePriorityFill) n2Fill = pxePriorityFill;
+        System.out.println("For filling - dito:" + n2Fill);
+        if(n2Fill > 0) fill_inqr(n2Fill, "3");
         
-        int n2Fill = get2Fill(pxe2Fill, "0");
+        n2Fill = get2Fill(pxePriorityFill, "0");
         if (n2Fill > pxePriorityFill) n2Fill = pxePriorityFill;
         System.out.println("For filling - globe:" + n2Fill);
+        if(n2Fill > 0) fill_inqr(n2Fill, "0");
+         
+        n2Fill = get2Fill(pxePriorityFill, "1");
+        if (n2Fill > pxePriorityFill) n2Fill = pxePriorityFill;
+        System.out.println("For filling - smart:" + n2Fill);
+        if(n2Fill > 0) fill_inqr(n2Fill, "1");
+
+        n2Fill = get2Fill(pxePriorityFill, "2");
+        if (n2Fill > pxePriorityFill) n2Fill = pxePriorityFill;
+        System.out.println("For filling - sun:" + n2Fill);
+        if(n2Fill > 0) fill_inqr(n2Fill, "2");
+        
+        //other source
+        n2Fill = get2Fill(pxe2Fill, "0");
         if(n2Fill > 0) fill_sched(n2Fill, "0");
          
         n2Fill = get2Fill(pxe2Fill, "1");
-        if (n2Fill > pxePriorityFill) n2Fill = pxePriorityFill;
-        System.out.println("For filling - smart:" + n2Fill);
         if(n2Fill > 0) fill_sched(n2Fill, "1");
 
         n2Fill = get2Fill(pxe2Fill, "2");
-        if (n2Fill > pxePriorityFill) n2Fill = pxePriorityFill;
-        System.out.println("For filling - sun:" + n2Fill);
         if(n2Fill > 0) fill_sched(n2Fill, "2");
         
         return true;
@@ -113,7 +137,7 @@ public class TLM_Leads1 implements UtilityValidator{
                     + " FROM Call_Outgoing"
                     + " WHERE cTranStat IN ('0', '1')" 
                         + " AND sSourceCD NOT IN (" +
-                                "'LEND', 'MCSO', 'MCCA', 'MPIn', 'GBF', 'FSCU', 'DC', 'OTH', 'INQR'" + ")";   
+                                "'LEND', 'MCSO', 'MPIn', 'GBF', 'FSCU', 'DC', 'OTH'" + ")";   
       
         switch (cSubscrbr) {
             case "0":
@@ -123,6 +147,9 @@ public class TLM_Leads1 implements UtilityValidator{
                 lsSQL = lsSQL + " AND cSubscrbr = " + SQLUtil.toSQL(cSubscrbr);      
                 break;
             case "2":
+                lsSQL = lsSQL + " AND cSubscrbr = " + SQLUtil.toSQL(cSubscrbr);
+                break;
+            case "3":
                 lsSQL = lsSQL + " AND cSubscrbr = " + SQLUtil.toSQL(cSubscrbr);
                 break;
             default:
@@ -164,8 +191,7 @@ public class TLM_Leads1 implements UtilityValidator{
                         ", a.sTransNox" +
                         ", " + SQLUtil.toSQL(lsSQL) + " sTableNme" + 
                         ", a.dTransact" +
-                        ", a.sCreatedx" +
-                        ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" +
+                        ", IFNULL(a.sCreatedx, '') sCreatedx" +
                     " FROM" + 
                         "  MC_Product_Inquiry a" +  
                         ", Client_Master b" + 
@@ -175,18 +201,15 @@ public class TLM_Leads1 implements UtilityValidator{
                         " AND b.sMobileNo = c.sMobileNo" +
                         " AND c.cSubscrbr = " + SQLUtil.toSQL(fcSubscrbr) +
                         " AND a.cTranStat = '0'" +  
-                        " AND a.dTransact >= " + SQLUtil.toSQL(ldStart) +
+                        " AND a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)) +
                         " AND a.sInquiryx = " + SQLUtil.toSQL(fsInquryTp) +
-                        " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" +  
-                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" +  
-                            " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" +  
-                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" +  
+                        " AND ((a.dFollowUp <= CURRENT_TIMESTAMP())" +  
+                            " OR (a.dTargetxx <= CURRENT_TIMESTAMP()" +  
                                 " AND a.dFollowUp IS NULL)" +  
-                            " OR (a.sInquiryx = 'WI'" +  
-                                " AND @xTransact >= a.dTransact" +  
+                            " OR (DATE_ADD(CURRENT_DATE(), INTERVAL - 2 DAY) >= a.dTransact" +  
                                 " AND a.dTargetxx IS NULL" +  
                                 " AND a.dFollowUp IS NULL))" +  
-                    " ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact ASC";
+                    " ORDER BY a.dTransact DESC, a.dFollowUp DESC, a.dTargetxx DESC";
         } else {
             lsSQL = "SELECT" + 
                         "  b.sMobileNo" +
@@ -195,8 +218,7 @@ public class TLM_Leads1 implements UtilityValidator{
                         ", a.sTransNox" +
                         ", " + SQLUtil.toSQL(lsSQL) + " sTableNme" + 
                         ", a.dTransact" +
-                        ", a.sCreatedx" +
-                        ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" +
+                        ", IFNULL(a.sCreatedx, '') sCreatedx" +
                     " FROM" +
                         "  MP_Product_Inquiry a" +
                         ", Client_Master b" +
@@ -206,33 +228,23 @@ public class TLM_Leads1 implements UtilityValidator{
                         " AND b.sMobileNo = c.sMobileNo" +
                         " AND c.cSubscrbr = " + SQLUtil.toSQL(fcSubscrbr) +
                         " AND a.cTranStat = '0'" +  
-                        " AND a.dTransact >= " + SQLUtil.toSQL(ldStart) +
+                        " AND a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)) +
                         " AND a.sInquiryx = " + SQLUtil.toSQL(fsInquryTp) +
-                        " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" + 
-                            " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                                " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
-                                " AND a.dFollowUp IS NULL)" + 
-                            " OR (a.sInquiryx = 'WI'" + 
-                                " AND @xTransact >= a.dTransact" + 
-                                " AND a.dTargetxx IS NULL" + 
+                        " AND ((a.dFollowUp <= CURRENT_TIMESTAMP())" +  
+                            " OR (a.dTargetxx <= CURRENT_TIMESTAMP()" +  
+                                " AND a.dFollowUp IS NULL)" +  
+                            " OR (DATE_ADD(CURRENT_DATE(), INTERVAL - 2 DAY) >= a.dTransact" +  
+                                " AND a.dTargetxx IS NULL" +  
                                 " AND a.dFollowUp IS NULL))" + 
-                        "ORDER BY a.dFollowUp DESC, a.dTargetxx DESC, a.dTransact ASC";
+                        " ORDER BY a.dTargetxx DESC, a.dFollowUp DESC, a.dTransact DESC";
         }
-        
         
         return processLeads(instance.executeQuery(lsSQL), pxePriorityFill, fcSubscrbr);
     }
     
-    
-    //Retrieve records to be scheduled...
-    //===================================
-    private void fill_sched(int n2Fill, String lcSubScribe){        
+    private void fill_inqr(int n2Fill, String lcSubScribe){
         String lsSQL;
-        
-        //kalyptus - 2017.10.10 09:17am
-        //load MC_Product_Inquiry: 2 DAYS AGO upto 10 minutes before the scheduled followup...
-        //                 and if Walk inquiry after 7 days ago... Previously it was 60 days ago.
+
         lsSQL = "SELECT" + 
                     "  b.sMobileNo" +
                     ", a.sClientID" +
@@ -241,8 +253,7 @@ public class TLM_Leads1 implements UtilityValidator{
                     ", a.sTransNox" +
                     ", 'MC_Product_Inquiry' sTableNme" +
                     ", a.dTransact" +
-                    ", a.sCreatedx" +
-                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                    ", IFNULL(a.sCreatedx, '') sCreatedx" +
                 " FROM" +
                     "  MC_Product_Inquiry a" +
                     ", Client_Master b" +
@@ -250,57 +261,97 @@ public class TLM_Leads1 implements UtilityValidator{
                 " WHERE a.sClientID = b.sClientID" +
                     " AND b.sClientID = c.sClientID" +
                     " AND b.sMobileNo = c.sMobileNo" +
-                    " AND a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)) +
                     " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
                     " AND a.cTranStat = '0'" + 
                     " AND a.sInquiryx <> 'FB'" + 
-                    " AND ((a.dFollowUp < DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 DAY))" + 
-                        " OR (a.dTargetxx < DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
+                    " AND ((a.dFollowUp <= CURRENT_TIMESTAMP())" + 
+                        " OR (a.dTargetxx <= CURRENT_TIMESTAMP()" + 
                             " AND a.dFollowUp IS NULL)" + 
-                        " OR (a.sInquiryx = 'WI'" + 
-                            " AND @xTransact >= a.dTransact" + 
+                        " OR (a.sInquiryx IN ('WI', 'SR')" + 
+                            " AND DATE_ADD(CURRENT_DATE(), INTERVAL - 2 DAY) >= a.dTransact" + 
                             " AND a.dTargetxx IS NULL" + 
                             " AND a.dFollowUp IS NULL))" + 
                     " AND a.dTransact >= '2020-01-01'";
+        
+        //if globe and dito
+        if (lcSubScribe.equals("0") || lcSubScribe.equals("3")){
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)));           
+        } else {
+            lsSQL = MiscUtil.addCondition(lsSQL, "a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)));
+        }
 
-        //load MP_Product_Inquiry: 2 DAYS AGO upto 10 minutes before the scheduled followup...
-        //                 and if Walk inquiry after 7 days ago... Previously it was 60 days ago.
-        lsSQL += " UNION ";
-        lsSQL += "SELECT" + 
-                    "  b.sMobileNo" +
-                    ", a.sClientID" +
-                    ", a.dFollowUp" +
-                    ", a.dTargetxx" +
-                    ", a.sTransNox" +
-                    ", 'MP_Product_Inquiry' sTableNme" +
-                    ", a.dTransact" +
-                    ", a.sCreatedx" +
-                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
-                " FROM" +
-                    "  MP_Product_Inquiry a" +
-                    ", Client_Master b" +
-                    ", Client_Mobile c" + 
-                " WHERE a.sClientID = b.sClientID" +
-                    " AND b.sClientID = c.sClientID" +
-                    " AND b.sMobileNo = c.sMobileNo" +
-                    " AND a.dTransact >= " + SQLUtil.toSQL(SQLUtil.dateFormat(MiscUtil.dateAdd(instance.getServerDate(), pxeLastDateInqr), SQLUtil.FORMAT_SHORT_DATE)) +
-                    " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
-                    " AND a.cTranStat = '0'" + 
-                    " AND a.sInquiryx <> 'FB'" + 
-                    " AND ((a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE))" + 
-                        " OR (a.dTargetxx BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                            " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
-                            " AND a.dFollowUp IS NULL)" + 
-                        " OR (a.sInquiryx = 'WI'" + 
-                            " AND @xTransact >= a.dTransact" + 
-                            " AND a.dTargetxx IS NULL" + 
-                            " AND a.dFollowUp IS NULL))" + 
-                    " AND a.dTransact >= '2020-01-01'";
+        lsSQL += " ORDER BY dTargetxx DESC, dFollowUp DESC, dTransact DESC";
 
+        ResultSet loRS = instance.executeQuery(lsSQL);
+        int lnRow = (int) MiscUtil.RecordCount(loRS);
+        
+        switch(lcSubScribe){
+            case "0":
+                System.out.println("Globe inquiry available: " + lnRow);
+                break;
+            case "1":
+                System.out.println("Smart inquiry available: " + lnRow);
+                break;
+            case "2":
+                System.out.println("Sun inquiry available: " + lnRow);
+            case "3":
+                System.out.println("Dito inquiry available: " + lnRow);
+        }
+        
+        if (lnRow <= 0){
+            //recycle the unreachable leads that is last called 24 hours or later
+            lsSQL = "SELECT" + 
+                        "  b.sMobileNo" +
+                        ", a.sClientID" +
+                        ", a.sReferNox sTransNox" +
+                        ", CASE a.sSourceCD" +
+                            " WHEN 'INQR' THEN 'MC_Product_Inquiry'" +
+                            " ELSE 'MC_Credit_Application'" +
+                            "	END sTableNme" +
+                        ", a.dTransact" +
+                        ", '5' sCreatedx" +
+                        ", IFNULL(b.nUnreachx, 0) nUnreachx" +
+                        ", a.sTransNox xTransNox" +
+                    " FROM Call_Outgoing a" +
+                        ", Client_Mobile b" +
+                    " WHERE a.sClientID = b.sClientID" + 
+                        " AND a.sMobileNo = b.sMobileNo" +
+                        " AND a.dTransact >= '2020-01-01'" +
+                        " AND IFNULL(a.dCallEndx, '1900-00-00 00:00:00') <= DATE_SUB(NOW(), INTERVAL 24 HOUR)" +
+                        " AND a.sSourceCD IN ('INQR')" +
+                        " AND a.cTLMStatx = 'UR'" +
+                        " AND a.cTranStat = '2'" +
+                        " AND b.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
+                    " HAVING IFNULL(nUnreachx, 0) < 3" +
+                    " ORDER BY dTransact DESC LIMIT " + n2Fill;
+            
+            loRS = instance.executeQuery(lsSQL);
+            lnRow = (int) MiscUtil.RecordCount(loRS);
+
+            switch(lcSubScribe){
+                case "0":
+                    System.out.println("Globe recyclable inquiry available: " + lnRow);
+                    break;
+                case "1":
+                    System.out.println("Smart recyclable inquiry available: " + lnRow);
+                    break;
+                case "2":
+                    System.out.println("Sun recyclable inquiry available: " + lnRow);
+                case "3":
+                    System.out.println("Dito recyclable inquiry available: " + lnRow);
+            }
+        }
+
+        processLeads(loRS, n2Fill, lcSubScribe);
+    }
+    
+    
+    //Retrieve records to be scheduled...
+    //===================================
+    private void fill_sched(int n2Fill, String lcSubScribe){        
+        String lsSQL;
         //load MC_Referral: 2 DAYS AGO upto 10 minutes before the scheduled followup...
-        lsSQL += " UNION ";
-        lsSQL += "SELECT" + 
+        lsSQL = "SELECT" + 
                     "  b.sMobileNo" +
                     ", a.sClientID" +
                     ", a.dFollowUp" +
@@ -308,8 +359,7 @@ public class TLM_Leads1 implements UtilityValidator{
                     ", a.sTransNox" +
                     ", 'MC_Referral' sTableNme" +
                     ", a.dTransact" +
-                    ", '' sCreatedx" +
-                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                    ", IFNULL(a.sAgentIDx, '') sCreatedx" +
                 " FROM" +
                     "  MC_Referral a" +
                     ", Client_Master b" +
@@ -319,9 +369,7 @@ public class TLM_Leads1 implements UtilityValidator{
                     " AND b.sMobileNo = c.sMobileNo" +
                     " AND c.cSubscrbr = '0'" +
                     " AND a.cTranStat = '0'" + 
-                    " AND (a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                        " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
-                        " OR a.dFollowUp IS NULL)"; 
+                    " AND (a.dFollowUp <= CURRENT_TIMESTAMP() OR a.dFollowUp IS NULL)"; 
 
         //load Call_Incoming: 2 DAYS AGO upto 10 minutes before the scheduled followup...
         lsSQL += " UNION ";
@@ -333,13 +381,10 @@ public class TLM_Leads1 implements UtilityValidator{
                     ", sTransNox" +
                     ", 'Call_Incoming' sTableNme" +
                     ", dTransact" +
-                    ", '' sCreatedx" +
-                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                    ", IFNULL(sAgentIDx, '') sCreatedx" +
                 " FROM Call_Incoming" + 
                 " WHERE cTranStat = '0'" + 
-                    " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                        " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
-                        " OR dFollowUp IS NULL)" + 
+                    " AND (dFollowUp <= CURRENT_TIMESTAMP() OR dFollowUp IS NULL)" + 
                     " AND LENGTH(REPLACE(REPLACE(sMobileNo, '+', ''), '*', '')) = 11" +
                     " AND REPLACE(REPLACE(sMobileNo, '+', ''), '*', '') <> ''";
 
@@ -354,13 +399,10 @@ public class TLM_Leads1 implements UtilityValidator{
                     ", 'SMS_Incoming' sTableNme" +
                     ", dTransact" +
                     ", '' sCreatedx" +
-                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
                 " FROM SMS_Incoming" + 
                 " WHERE cTranStat = '0'" + 
                     " AND cReadxxxx = '1'" + 
-                    " AND (dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                        " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
-                        " OR dFollowUp IS NULL)" + 
+                    " AND (dFollowUp <= CURRENT_TIMESTAMP() OR dFollowUp IS NULL)" +
                     " AND sMessagex NOT LIKE '%FSE%'";
 
         //load SMS_Incoming: 2 DAYS AGO upto 10 minutes before the scheduled followup...
@@ -375,8 +417,7 @@ public class TLM_Leads1 implements UtilityValidator{
                     ", a.sClientID sTransNox" +
                     ", 'TLM_Client' sTableNme" +
                     ", a.dFollowUp dTransact" +
-                    ", '' sCreatedx" +
-                    ", @xTransact := DATE_ADD(CURRENT_DATE(), INTERVAL - 8 DAY) xTransact" + 
+                    ", IFNULL(a.sAgentIDx, '') sCreatedx" +
                 " FROM" +
                     "  TLM_Client a" +
                     ", Client_Master b" +
@@ -386,13 +427,11 @@ public class TLM_Leads1 implements UtilityValidator{
                     " AND b.sMobileNo = c.sMobileNo" +
                     " AND c.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
                     " AND IFNULL(a.cTranStat, '0') = '0'" + 
-                    " AND a.sClassIDx = '0001'" +
+                    " AND a.sClassIDx IN ('0001', '0002')" +
                     " AND a.cSourceCd = 'MP'" + 
-                    " AND (a.dFollowUp BETWEEN DATE_SUB(CURRENT_DATE(), INTERVAL 2 DAY)" + 
-                       " AND DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)" + 
-                       " OR a.dFollowUp IS NULL)";
+                    " AND (a.dFollowUp <= CURRENT_TIMESTAMP() OR a.dFollowUp IS NULL)";
 
-        lsSQL += " ORDER BY dFollowUp DESC, dTargetxx DESC, sTableNme ASC, dTransact ASC LIMIT 300";
+        lsSQL += "  ORDER BY dTargetxx DESC, dFollowUp DESC, dTransact DESC LIMIT 300";
         
         ResultSet loRS = instance.executeQuery(lsSQL);
         processLeads(loRS, n2Fill, lcSubScribe);
@@ -412,7 +451,7 @@ public class TLM_Leads1 implements UtilityValidator{
             String lsCreatedx;
 
             instance.beginTrans();
-            
+            loRS.beforeFirst();
             while(loRS.next() && lnCtr < n2Fill){
                 System.out.println("TABLE:" + loRS.getString("sTableNme")); 
                 if(loRS.getString("sTableNme").equalsIgnoreCase("MC_Product_Inquiry")){
@@ -420,53 +459,41 @@ public class TLM_Leads1 implements UtilityValidator{
                     lsClientID = loRS.getString("sClientID");
                     lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
-                    lsCreatedx = "";
-                    
-                    if (loRS.getString("sCreatedx") != null)
-                        if (loRS.getString("sTransNox").substring(0, 4).toLowerCase().equals("m0t1")) 
-                            lsCreatedx = loRS.getString("sCreatedx");
-                    else
-                        lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));    
+                    lsCreatedx = loRS.getString("sCreatedx");  
                 } 
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("MP_Product_Inquiry")){
                     lsSourceCD = "MPIn";
                     lsClientID = loRS.getString("sClientID");
                     lsMobileNo = loRS.getString("sMobileNo");
-                    lsCreatedx = "";
-                    
-                    if (loRS.getString("sCreatedx") != null)
-                        if (loRS.getString("sTransNox").substring(0, 4).toLowerCase().equals("m0t1")) 
-                            lsCreatedx = loRS.getString("sCreatedx");
-                    else
-                        lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));   
+                    lsCreatedx = loRS.getString("sCreatedx");
                 }
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("MC_Referral")){
                     lsSourceCD = "RFRL";
                     lsClientID = loRS.getString("sClientID");
                     lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
-                    lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));
+                    lsCreatedx = loRS.getString("sCreatedx");
                 }
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("Call_Incoming")){
                     lsSourceCD = "CALL";
                     lsClientID = getClient(loRS.getString("sMobileNo"), loRS.getString("sTransNox"));
                     lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
-                    lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));
+                    lsCreatedx = loRS.getString("sCreatedx");
                 }
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("SMS_Incoming")){
                     lsSourceCD = "ISMS";
                     lsClientID = getClient(loRS.getString("sMobileNo"), loRS.getString("sTransNox"));
                     lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
-                    lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));
+                    lsCreatedx = loRS.getString("sCreatedx");
                 }
                 else if(loRS.getString("sTableNme").equalsIgnoreCase("TLM_Client")){
                     lsSourceCD = "TLMC";
                     lsClientID = loRS.getString("sClientID");
                     lsMobileNo = loRS.getString("sMobileNo");
                     lcSubscrbr = "";
-                    lsCreatedx = getAgentIDx(lsSourceCD, loRS.getString("sTransNox"));
+                    lsCreatedx = loRS.getString("sCreatedx");
                 }            
                 else{
                     lsSourceCD = "";
@@ -492,11 +519,27 @@ public class TLM_Leads1 implements UtilityValidator{
 
                         //Create a schedule if number has no pending schedule
                         if(!loRSX.next()) {
-                            System.out.println("Number has no outgoing call!" + lsMobileNo);
                             lsSQL = new StringBuilder();
                             
-                            if (lsCreatedx.isEmpty())
-                                lsSQL.append("INSERT INTO Call_Outgoing" 
+                            switch (lsCreatedx){
+                                case "5":
+                                    //update recycled lead
+                                    lsSQL.append("UPDATE Call_Outgoing SET" +
+                                                    "  cTranStat = '5'" +
+                                                    ", sModified = " + SQLUtil.toSQL(instance.getUserID()) +
+                                                    ", dModified = " + SQLUtil.toSQL(instance.getServerDate()) +
+                                                " WHERE sTransNox = " + SQLUtil.toSQL(loRS.getString("xTransNox")));
+                                    
+                                    long count = instance.executeQuery(lsSQL.toString(), "Call_Outgoing", "", "");
+
+                                    if(count == 0){
+                                        System.err.println(instance.getMessage() + instance.getErrMsg());
+                                        instance.rollbackTrans();
+                                        System.exit(1);
+                                    }
+                                    lsSQL = new StringBuilder();
+                                case "":
+                                    lsSQL.append("INSERT INTO Call_Outgoing" 
                                             + " SET sTransNox = " + SQLUtil.toSQL(MiscUtil.getNextCode("Call_Outgoing", "sTransNox", true, instance.getConnection(), instance.getBranchCode()))
                                             + ", dTransact = " + SQLUtil.toSQL(instance.getServerDate()) 
                                             + ", sClientID = " + SQLUtil.toSQL(lsClientID)
@@ -514,8 +557,10 @@ public class TLM_Leads1 implements UtilityValidator{
                                             + ", nSMSSentx = 0" 
                                             + ", sModified = " + SQLUtil.toSQL(instance.getUserID())
                                             + ", dModified = " + SQLUtil.toSQL(instance.getServerDate()));
-                            else
-                                lsSQL.append("INSERT INTO Call_Outgoing" 
+                                    
+                                    break;
+                                default:
+                                    lsSQL.append("INSERT INTO Call_Outgoing" 
                                             + " SET sTransNox = " + SQLUtil.toSQL(MiscUtil.getNextCode("Call_Outgoing", "sTransNox", true, instance.getConnection(), instance.getBranchCode()))
                                             + ", dTransact = " + SQLUtil.toSQL(instance.getServerDate()) 
                                             + ", sClientID = " + SQLUtil.toSQL(lsClientID)
@@ -533,6 +578,7 @@ public class TLM_Leads1 implements UtilityValidator{
                                             + ", nSMSSentx = 0" 
                                             + ", sModified = " + SQLUtil.toSQL(instance.getUserID())
                                             + ", dModified = " + SQLUtil.toSQL(instance.getServerDate()));
+                            }
 
                             long count = instance.executeQuery(lsSQL.toString(), "Call_Outgoing", "", "");
 
@@ -560,11 +606,8 @@ public class TLM_Leads1 implements UtilityValidator{
                                 instance.executeQuery(lsSQL.toString(), loRS.getString("sTableNme"), "", "");
                             }
                         }
-                        // kalyptus - 2016.08.01 13.45pm
-                        // a number has a pending schedule so set 
                         else{
                             System.out.println("Number has outgoing call!" + lsMobileNo);
-
                             if(loRS.getString("sTableNme").equalsIgnoreCase("TLM_Client")) {
                                 //Tagged the source do not schedule
                                 lsSQL = new StringBuilder();

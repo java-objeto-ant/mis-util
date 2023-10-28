@@ -50,6 +50,17 @@ public class ClientAccounts {
             System.exit(1);
         }
         
+        //proccess App Users requesting for account deactivation
+        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.GCONNECT);
+        utility.setGRider(instance);
+        
+        if (!utility.Run()){
+            System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
+            System.exit(1);
+        }
+        
+        
         //close connection
         instance.logoutUser();
         MiscUtil.close(instance.getConnection());

@@ -59,6 +59,7 @@ public class Classify_Mobile implements UtilityValidator{
                         " WHERE sClientID = " + SQLUtil.toSQL(loRS.getString("sClientID")) +
                             " AND sMobileNo = " + SQLUtil.toSQL(loRS.getString("xMobileNo"));
                 
+                instance.beginTrans();
                 if (instance.executeQuery(lsSQL, "Client_Mobile", instance.getBranchCode(), "") <= 0){
                     if (!instance.getErrMsg().isEmpty()){
                         instance.rollbackTrans();
@@ -66,6 +67,7 @@ public class Classify_Mobile implements UtilityValidator{
                         System.exit(1);
                     }
                 }
+                instance.commitTrans();
             }
         } catch (SQLException ex) {
             Logger.getLogger(ClassifyClientMobile.class.getName()).log(Level.SEVERE, null, ex);

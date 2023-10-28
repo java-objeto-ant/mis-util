@@ -1,19 +1,19 @@
 package org.rmj.mis.util.gapp;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import java.util.Properties;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import org.rmj.appdriver.GRider;
-import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
-import org.rmj.appdriver.agentfx.CommonUtils;
-import org.rmj.appdriver.agentfx.WebClient;
+import org.rmj.appdriver.agent.GRiderX;
 
 public class SendEmailVerification {
     final static String SEND_VERIFICATION = "security/send-verification.php";
@@ -22,7 +22,16 @@ public class SendEmailVerification {
         final String PRODUCTID = "IntegSys";
         final String USERID = "M001111122";
         
-        GRider poGRider = new GRider(PRODUCTID);
+        String path;
+        if(System.getProperty("os.name").toLowerCase().contains("win")){
+            path = "D:/GGC_Java_Systems";
+        }
+        else{
+            path = "/srv/mac/GGC_Java_Systems";
+        }
+        System.setProperty("sys.default.path.config", path);
+        
+        GRiderX poGRider = new GRiderX("IntegSys");
 
         if (!poGRider.loadEnv(PRODUCTID)) {
             System.err.println(poGRider.getMessage());
@@ -35,73 +44,79 @@ public class SendEmailVerification {
             System.exit(1);
         }
                 
-        String lsSQL = "SELECT * FROM App_User_Master" +
-                        " WHERE cActivatd = '0'" + 
-                            " AND sUserIDxx IN ('GAP021006601')";
+        String lsSQL = "SELECT *" + 
+                        " FROM App_User_Master" + 
+                        " WHERE sProdctID IN ('gRider', 'IntegSys')" +
+                            " AND cEmailSnt <> '1'" + 
+                            " AND cActivatd <> '1'" +
+                            " AND dCreatedx >= '2023-08-01'" +
+                        " ORDER BY dCreatedx DESC" +
+                        " LIMIT 50";
         
         ResultSet loRS = poGRider.executeQuery(lsSQL);
         
         try {
-            JSONObject param = new JSONObject();
+            String to;
+            String message;
+            
             while (loRS.next()){
-                param.clear();
-                param.put("email", loRS.getString("sEmailAdd"));
-                param.put("username", loRS.getString("sUserName"));
-                param.put("password", loRS.getString("sPassword"));
-                param.put("hash", loRS.getString("sItIsASIN"));
+                to = loRS.getString("sEmailAdd");
+                message = "Thank you for signing up!\n" +
+                            "Your account has been created. Please click the link below to activate your account.\n\n" +
+                            "https://restgk.guanzongroup.com.ph/security/account_verify.php?email=" + loRS.getString("sEmailAdd") + "&hash=" + loRS.getString("sItIsASIN");
                 
-                sendEmail(poGRider, param);
+                
+                if (sendmail(to, "Signup | Verification", message)){
+                    lsSQL = "UPDATE App_User_Master SET" +
+                                "  cEmailSnt = '1'" +
+                                ", nEmailSnt = 1" +
+                            " WHERE sUserIDxx = " + SQLUtil.toSQL(loRS.getString("sUserIDxx"));
+                    System.out.println(lsSQL);
+                    poGRider.executeUpdate(lsSQL);
+                }
             }
+            System.exit(0);
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
             System.exit(1);
         }
     }
     
-    private static void sendEmail(GRider foGRider, JSONObject loJSON){
-        Calendar calendar = Calendar.getInstance();
+    private static boolean sendmail(String to, String subject, String body){
+        final String username = "noreply.guanzongroup@gmail.com";
+        final String password = "lsrmdimuftovtnwh";     
         
-        Map<String, String> headers =
-                new HashMap<String, String>();
-        headers.put("Accept", "application/json");
-        headers.put("Content-Type", "application/json");
-        headers.put("g-api-id", "GuanzonApp");
-        headers.put("g-api-imei", MiscUtil.getPCName());
-        headers.put("g-api-key", SQLUtil.dateFormat(calendar.getTime(), "yyyyMMddHHmmss"));
-        headers.put("g-api-hash", org.apache.commons.codec.digest.DigestUtils.md5Hex((String)headers.get("g-api-imei") + (String)headers.get("g-api-key")));
-        headers.put("g-api-client", foGRider.getClientID());
-        headers.put("g-api-user", foGRider.getUserID());
-        headers.put("g-api-log", "");
-        headers.put("g-api-token", "");
+        Properties prop = new Properties();
+        prop.put("mail.smtp.host", "smtp.gmail.com");
+        prop.put("mail.smtp.port", "587");
+        prop.put("mail.smtp.auth", "true");
+        prop.put("mail.smtp.starttls.enable", "true"); //TLS
         
-        JSONObject param = new JSONObject();
-        param.put("email", loJSON.get("email"));
-        param.put("username", loJSON.get("username"));
-        param.put("password", loJSON.get("password"));
-        param.put("hash", loJSON.get("hash"));
-        
-        JSONParser oParser = new JSONParser();
-        JSONObject json_obj = null;
-        
+        Session session = Session.getInstance(prop,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(username, password);
+                    }
+                });
+
         try {
-            System.out.println(CommonUtils.getConfiguration(foGRider, "WebSvr") + SEND_VERIFICATION);
-            String response = WebClient.sendHTTP(CommonUtils.getConfiguration(foGRider, "WebSvr") + SEND_VERIFICATION, param.toJSONString(), (HashMap<String, String>) headers);
-            if(response == null){
-                System.err.println("No response from the server. ->>" + SEND_VERIFICATION);
-                System.exit(1);
-            }
-            json_obj = (JSONObject) oParser.parse(response);
-            response = (String) json_obj.get("result");
-            
-            if (response.equalsIgnoreCase("success")){
-                System.out.println((String) json_obj.get("message") + " ->> " + (String) loJSON.get("email"));
-            } else {
-                System.err.println((String) json_obj.get("message"));
-                System.exit(1);
-            }
-        } catch (IOException | ParseException ex) {
-            System.err.println(ex.getMessage());
-            System.exit(1);
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress("noreply.guanzongroup@gmail.com", "Guanzon"));
+            message.setRecipients(
+                    Message.RecipientType.TO,
+                    InternetAddress.parse(to)
+            );
+            message.setSubject(subject);
+            message.setText(body);
+
+            Transport.send(message);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return false;
         }
+        
+        return true;
     }
+    
 }

@@ -29,6 +29,26 @@ public class TLMAccounts {
         
         UtilityValidator utility;
         
+        //fix no subscriber inquiries
+        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_FIX);
+        utility.setGRider(instance);
+        
+        if (!utility.Run()){
+            System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
+            System.exit(1);
+        }
+        
+        //process ganado
+        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.GANADO);
+        utility.setGRider(instance);
+        
+        if (!utility.Run()){
+            System.err.println(utility.getMessage());
+            logwrapr.severe(utility.getMessage());
+            System.exit(1);
+        }
+        
         //process TLM Primary Leads
         utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_PRIMARY_LEADS);
         utility.setGRider(instance);
@@ -38,7 +58,6 @@ public class TLMAccounts {
             logwrapr.severe(utility.getMessage());
             System.exit(1);
         } 
-        
         
         //process TLM Leads from approved credit applications
         utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_CA_LEADS);
