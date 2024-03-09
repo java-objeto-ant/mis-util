@@ -11,7 +11,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import org.rmj.appdriver.GRider;
 import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
 
@@ -44,18 +43,20 @@ public class SendEmailVerification {
             System.exit(1);
         }
                 
-        String lsSQL = "SELECT *" + 
+        
+        
+        try {
+            String lsSQL = "SELECT *" + 
                         " FROM App_User_Master" + 
-                        " WHERE sProdctID IN ('gRider', 'IntegSys')" +
+                        " WHERE sProdctID IN ('gRider', 'IntegSys', 'GuanzonApp')" +
                             " AND cEmailSnt <> '1'" + 
                             " AND cActivatd <> '1'" +
                             " AND dCreatedx >= '2023-08-01'" +
                         " ORDER BY dCreatedx DESC" +
                         " LIMIT 50";
         
-        ResultSet loRS = poGRider.executeQuery(lsSQL);
-        
-        try {
+            ResultSet loRS = poGRider.executeQuery(lsSQL);
+            
             String to;
             String message;
             
@@ -75,6 +76,51 @@ public class SendEmailVerification {
                     poGRider.executeUpdate(lsSQL);
                 }
             }
+            
+            lsSQL = "SELECT" +
+                        "  a.sTransNox" +
+                        ", a.cReqstCDe" +
+                        ", a.sMobileNo" +
+                        ", a.sSourceCD" +
+                        ", a.sSourceNo" +
+                        ", a.sMobileNo" +
+                        ", IFNULL(c.sFrstName, '') xFrstName" +
+                        ", b.sEmailAdd" +
+                    " FROM Mobile_Update_Request a" +
+                        " LEFT JOIN App_User_Master b ON a.sSourceNo = b.sUserIDxx" +
+                        " LEFT JOIN Client_Master c ON b.sMPlaceID = c.sClientID" +
+                    " WHERE a.sSourceCD = 'SKit'" + 
+                        " AND a.cTranStat = '0'";
+            
+            loRS = poGRider.executeQuery(lsSQL);
+            
+            while (loRS.next()){
+                to = loRS.getString("sEmailAdd");
+                
+                if (loRS.getString("xFrstName").isEmpty()){
+                    message = "Hi!";
+                } else {
+                    message = "Hi " + loRS.getString("xFrstName") + "!\n\n";
+                }
+                
+                message += "You have requested to change your mobile number to " + loRS.getString("sMobileNo") + ".\n";
+                message += "If you did not initiate this transaction please inform your UPLINE or contact us on 09171545477 or 09989545477.";
+                                
+                if (sendmail(to, "Update Mobile", message)){
+                    lsSQL = "UPDATE Mobile_Update_Request SET" +
+                                "  cTranStat = '1'" +
+                            " WHERE sTransNox = " + SQLUtil.toSQL(loRS.getString("sTransNox"));
+                    System.out.println(lsSQL);
+                    poGRider.executeUpdate(lsSQL);
+                    
+                    lsSQL = "UPDATE App_User_Master SET" +
+                                "  sMobileNo = " + SQLUtil.toSQL(loRS.getString("sMobileNo")) +
+                            " WHERE sUserIDxx = " + SQLUtil.toSQL(loRS.getString("sSourceNo"));
+                    System.out.println(lsSQL);
+                    poGRider.executeUpdate(lsSQL);
+                }
+            }
+            
             System.exit(0);
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());

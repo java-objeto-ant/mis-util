@@ -39,17 +39,17 @@ public class TLM_Leads1 implements UtilityValidator{
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - GLOBE");
         lnTotal += lnFilled;
         
-        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
-        System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SMART");
-        lnTotal += lnFilled;
-        
-        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
-        System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SUN");
-        lnTotal += lnFilled;
-        
-        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
-        System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - DITO");
-        lnTotal += lnFilled;
+//        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
+//        System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SMART");
+//        lnTotal += lnFilled;
+//        
+//        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
+//        System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SUN");
+//        lnTotal += lnFilled;
+//        
+//        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
+//        System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - DITO");
+//        lnTotal += lnFilled;
         
         System.out.println("System inserted total of " + lnTotal + " facebook inquiries from MC. - ALL NETWORKS");
         
@@ -59,17 +59,17 @@ public class TLM_Leads1 implements UtilityValidator{
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - GLOBE");
         lnTotal += lnFilled;
         
-        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
-        System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SMART");
-        lnTotal += lnFilled;
-        
-        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
-        System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SUN");
-        lnTotal += lnFilled;   
-        
-        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
-        System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - DITO");
-        lnTotal += lnFilled;    
+//        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
+//        System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SMART");
+//        lnTotal += lnFilled;
+//        
+//        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
+//        System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SUN");
+//        lnTotal += lnFilled;   
+//        
+//        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
+//        System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - DITO");
+//        lnTotal += lnFilled;    
         
         System.out.println("System inserted total of " + lnTotal + " facebook inquiries from MP. - ALL NETWORKS");
         
@@ -136,8 +136,7 @@ public class TLM_Leads1 implements UtilityValidator{
         lsSQL = "SELECT COUNT(*) nRecCount"
                     + " FROM Call_Outgoing"
                     + " WHERE cTranStat IN ('0', '1')" 
-                        + " AND sSourceCD NOT IN (" +
-                                "'LEND', 'MCSO', 'MPIn', 'GBF', 'FSCU', 'DC', 'OTH'" + ")";   
+                        + " AND sSourceCD NOT IN ('LEND', 'MCSO', 'MPIn', 'GBF', 'FSCU', 'DC', 'OTH')";   
       
         switch (cSubscrbr) {
             case "0":

@@ -40,14 +40,14 @@ public class TLMAccounts {
         }
         
         //process ganado
-        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.GANADO);
-        utility.setGRider(instance);
-        
-        if (!utility.Run()){
-            System.err.println(utility.getMessage());
-            logwrapr.severe(utility.getMessage());
-            System.exit(1);
-        }
+//        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.GANADO);
+//        utility.setGRider(instance);
+//        
+//        if (!utility.Run()){
+//            System.err.println(utility.getMessage());
+//            logwrapr.severe(utility.getMessage());
+//            System.exit(1);
+//        }
         
         //process TLM Primary Leads
         utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_PRIMARY_LEADS);
@@ -70,14 +70,14 @@ public class TLMAccounts {
         }
         
         //process TLM Leads from MC Sales
-        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_MCSO_AS_MP_LEADS);
-        utility.setGRider(instance);
-        
-        if (!utility.Run()){
-            System.err.println(utility.getMessage());
-            logwrapr.severe(utility.getMessage());
-            System.exit(1);
-        } 
+//        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.TLM_MCSO_AS_MP_LEADS);
+//        utility.setGRider(instance);
+//        
+//        if (!utility.Run()){
+//            System.err.println(utility.getMessage());
+//            logwrapr.severe(utility.getMessage());
+//            System.exit(1);
+//        } 
         
         //classify client mobile
         utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.CLASSIFY_MOBILE);

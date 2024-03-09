@@ -217,8 +217,6 @@ public class TLM_Ganado implements UtilityValidator{
                 " FROM " + MASTER_TABLE +
                 " WHERE cTranStat = '0'" +
                     " AND cGanadoTp = '1'" + //mc only
-                    " AND (dFollowUp <= CURRENT_TIMESTAMP()" + 
-                        " OR (dTargetxx <= CURRENT_TIMESTAMP() AND dFollowUp IS NULL)" + 
-                        " OR (dTargetxx IS NULL AND dFollowUp IS NULL))" ;
+                    " AND (dFollowUp IS NULL OR dFollowUp <= CURRENT_TIMESTAMP())";
     }
 }
