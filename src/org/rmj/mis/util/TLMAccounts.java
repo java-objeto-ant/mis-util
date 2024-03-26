@@ -39,7 +39,7 @@ public class TLMAccounts {
             System.exit(1);
         }
         
-        //process ganado
+        //process benta
 //        utility = UtilityValidatorFactory.make(UtilityValidatorFactory.UtilityType.GANADO);
 //        utility.setGRider(instance);
 //        
