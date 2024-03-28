@@ -73,7 +73,7 @@ public class testKwikSearch {
         detail.put("Alias", "sTransNox");
         detail.put("Criteria", "a.sTransNox");
         detail.put("Format", "@@@@-@@-@@@@@@");
-        detail.put("Display", "1");
+        detail.put("Display", "1");        
         columns.add(detail);
 
         detail = new JSONObject();
@@ -98,6 +98,7 @@ public class testKwikSearch {
         detail.put("Criteria", "a.dFollowUp");
         detail.put("Format", "yyyy-MM-dd");
         detail.put("Display", "1");
+        detail.put("Sort", "0");//0 - asc; 1 - desc;
         columns.add(detail);
         
         detail = new JSONObject();
@@ -106,6 +107,7 @@ public class testKwikSearch {
         detail.put("Criteria", "a.dTargetxx");
         detail.put("Format", "yyyy-MM-dd");
         detail.put("Display", "1");
+        detail.put("Sort", "0");//0 - asc; 1 - desc;
         columns.add(detail);
                 
         detail = new JSONObject();
@@ -114,6 +116,7 @@ public class testKwikSearch {
         detail.put("Criteria", "f.sBranchNm");
         detail.put("Format", "");
         detail.put("Display", "1");
+        detail.put("Sort", "0");//0 - asc; 1 - desc;
         columns.add(detail);
         
         detail = new JSONObject();
@@ -122,6 +125,7 @@ public class testKwikSearch {
         detail.put("Criteria", "IFNULL(e.sCompnyNm, '')");
         detail.put("Format", "");
         detail.put("Display", "1");
+        detail.put("Sort", "0");//0 - asc; 1 - desc;
         columns.add(detail);
         
         //columns for headers, conditions and sorting
