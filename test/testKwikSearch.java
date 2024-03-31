@@ -171,6 +171,11 @@ public class testKwikSearch {
         
         //sample usage of the GSearch Object
         GSearch loSearch = new GSearch(payload);
+        
+        //get the column filter value
+        System.out.println(loSearch.getColumnFilter(2));
+        
+        //move the column arrangement upwards or downwards
         loSearch.moveColumn(0, false);
         loSearch.moveColumn(2, true);
         
