@@ -27,7 +27,7 @@ public class SendMasking {
             System.exit(1);
         }
         
-        String message = "We'd like to invite you on our Blood Donation Drive on April 13, 2024 from 9am-4pm @ Los Pedritos Tapuac.\n" +
+        String message = "We'd like to invite you on our Blood Donation Drive tomorrow @ Los Pedritos Tapuac from 9am-4pm .\n" +
                             "\n" +
                             "Note: Kindly have your breakfast prior to donating";
         
@@ -48,11 +48,11 @@ public class SendMasking {
     public static ArrayList getRecipients(){
         ArrayList recipients = new ArrayList();
 
-        recipients.add("09075988115");
-recipients.add("09165845073");
-recipients.add("09682201542");
-recipients.add("09063350151");
-recipients.add("09958623406");
+//        recipients.add("09075988115");
+//recipients.add("09165845073");
+//recipients.add("09682201542");
+//recipients.add("09063350151");
+//recipients.add("09958623406");
 recipients.add("09157451597");
 recipients.add("09617415303");
 recipients.add("09172430452");

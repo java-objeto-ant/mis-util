@@ -15,7 +15,7 @@ public class TLMAccounts {
             path = "D:/GGC_Java_Systems";
         }
         else{
-            path = "/srv/mac/GGC_Java_Systems";
+            path = "/srv/GGC_Java_Systems";
         }
         System.setProperty("sys.default.path.config", path);
         

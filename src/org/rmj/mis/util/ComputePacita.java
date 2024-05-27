@@ -47,6 +47,7 @@ public class ComputePacita {
                 
                 loJSON = (JSONObject) loParser.parse(loRS.getString("sPayloadx"));
                 
+                System.out.println(loRS.getString("sTransNox"));
                 lsDeptIDx = (String) loJSON.get("sEvalType");
                 if (lsDeptIDx.equals("015")) lsDeptIDx = "4";
                 

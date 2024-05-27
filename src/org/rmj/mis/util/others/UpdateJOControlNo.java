@@ -12,7 +12,16 @@ public class UpdateJOControlNo {
         final String PRODUCTID = "IntegSys";
         final String USERID = "M001111122";
         
-        GRider poGRider = new GRider(PRODUCTID);
+        String path;
+        if(System.getProperty("os.name").toLowerCase().contains("win")){
+            path = "D:/GGC_Java_Systems";
+        }
+        else{
+            path = "/srv/GGC_Java_Systems";
+        }
+        System.setProperty("sys.default.path.config", path);
+        
+        GRider poGRider = new GRider(PRODUCTID);       
 
         if (!poGRider.loadEnv(PRODUCTID)) {
             System.err.println(poGRider.getMessage());

@@ -9,7 +9,7 @@ import org.rmj.appdriver.agentfx.CommonUtils;
 import org.rmj.appdriver.agentfx.StringHelper;
 
 public class Create3CLeads {
-    final int REFILL = 20;
+    final int REFILL = 100;
     
     GRider oApp;
     ResultSet oRS;
