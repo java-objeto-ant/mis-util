@@ -26,8 +26,8 @@ public class Create3C {
         
         Create3CLeads create = new Create3CLeads(instance);
         
-        create.setDateFrom("2024-06-03");
-        create.setDateThru("2024-07-02");
+        create.setDateFrom("2024-07-03");
+        create.setDateThru("2024-08-02");
         
         System.out.println(instance.getBranchCode());
         if (!create.Create()){

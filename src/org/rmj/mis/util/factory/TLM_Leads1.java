@@ -429,8 +429,8 @@ public class TLM_Leads1 implements UtilityValidator{
         if (n2Fill > pxePriorityFill) n2Fill = pxePriorityFill;
         if(n2Fill <= 0) return true;     
 
-        //last priority
-        //recycle the unreachable leads that is last called 24 hours or later
+//        //last priority
+//        //recycle the unreachable leads that is last called 24 hours or later
         lsSQL = "SELECT" + 
                     "  b.sMobileNo" +
                     ", a.sClientID" +
@@ -453,6 +453,7 @@ public class TLM_Leads1 implements UtilityValidator{
                     " AND a.cTLMStatx = 'UR'" +
                     " AND a.cTranStat = '2'" +
                     " AND b.cSubscrbr = " + SQLUtil.toSQL(lcSubScribe) +
+                    " AND a.dTransact BETWEEN '2024-01-01' AND " + SQLUtil.toSQL(MiscUtil.dateAdd(instance.getServerDate(), -1)) +
                 " HAVING IFNULL(nUnreachx, 0) < 3" +
                 " ORDER BY dTransact DESC LIMIT " + n2Fill;
 
