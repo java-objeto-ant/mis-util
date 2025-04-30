@@ -3,7 +3,6 @@ package org.rmj.mis.util;
 import org.rmj.appdriver.agent.GRiderX;
 import org.rmj.mis.util.factory.UtilityValidator;
 import org.rmj.mis.util.factory.UtilityValidatorFactory;
-import org.rmj.mis.util.hcm.Absenteeism;
 import org.rmj.replication.utility.LogWrapper;
 
 public class BatchShiftChange {

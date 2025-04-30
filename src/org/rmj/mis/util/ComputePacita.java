@@ -49,8 +49,16 @@ public class ComputePacita {
                 
                 System.out.println(loRS.getString("sTransNox"));
                 lsDeptIDx = (String) loJSON.get("sEvalType");
-                if (lsDeptIDx.equals("015")) lsDeptIDx = "4";
                 
+                switch (lsDeptIDx) {
+                    case "015":
+                        lsDeptIDx = "4"; break;
+                    //guest officers
+                    case "023": //Facility & Security Management(Alyana) 
+                    case "025": //Marketing
+                        lsDeptIDx = "026"; break;
+                        
+                }
                 
                 loArr = (JSONArray) loJSON.get("sPayloadx");
                 

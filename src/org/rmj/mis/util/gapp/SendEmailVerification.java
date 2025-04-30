@@ -11,12 +11,11 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import org.rmj.appdriver.MySQLAESCrypt;
 import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
 
 public class SendEmailVerification {
-    final static String SEND_VERIFICATION = "security/send-verification.php";
-    
     public static void main(String [] args){
         final String PRODUCTID = "IntegSys";
         final String USERID = "M001111122";
@@ -42,23 +41,21 @@ public class SendEmailVerification {
             System.err.println(poGRider.getErrMsg());
             System.exit(1);
         }
-                
-        
         
         try {
-            String lsSQL = "SELECT *" + 
-                        " FROM App_User_Master" + 
-                        " WHERE sProdctID IN ('gRider', 'IntegSys', 'GuanzonApp')" +
-                            " AND cEmailSnt <> '1'" + 
-                            " AND cActivatd <> '1'" +
-                            " AND dCreatedx >= '2023-08-01'" +
-                        " ORDER BY dCreatedx DESC" +
-                        " LIMIT 50";
-        
-            ResultSet loRS = poGRider.executeQuery(lsSQL);
-            
             String to;
             String message;
+            
+            String lsSQL = "SELECT *" + 
+                            " FROM App_User_Master" + 
+                            " WHERE sProdctID IN ('gRider', 'IntegSys', 'GuanzonApp')" +
+                                " AND cEmailSnt <> '1'" + 
+                                " AND cActivatd <> '1'" +
+                                " AND dCreatedx >= '2023-08-01'" +
+                            " ORDER BY dCreatedx DESC" +
+                            " LIMIT 50";
+        
+            ResultSet loRS = poGRider.executeQuery(lsSQL);
             
             while (loRS.next()){
                 to = loRS.getString("sEmailAdd");

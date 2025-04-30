@@ -42,8 +42,8 @@ public class UpdateJOControlNo {
             ResultSet loRS = poGRider.executeQuery(lsSQL);
             loRS.next();
             System.out.println(loRS.getString(1));
-            String lsBranch = poGRider.getBranchCode() +  "22";
-//            String lsBranch = poGRider.getBranchCode() +  loRS.getString(1).substring(2);
+//            String lsBranch = poGRider.getBranchCode() +  "24";
+            String lsBranch = poGRider.getBranchCode() +  loRS.getString(1).substring(2);
             
             // create a scanner so we can read the command-line input
             Scanner scanner = new Scanner(System.in);

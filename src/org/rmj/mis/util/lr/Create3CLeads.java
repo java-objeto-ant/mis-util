@@ -190,7 +190,7 @@ public class Create3CLeads {
                     " AND a.dLastPaym > DATE_SUB(NOW(), INTERVAL 3 MONTH)" +
                     " AND (a.cAcctStat = '0' OR (a.dClosedxx >= " + SQLUtil.toSQL(dDateFrom + " 00:00:00") + " AND a.cAcctStat <> '0'))" + 
                     " AND a.cMotorNew = '1' " +
-                    " AND a.nDelayAvg BETWEEN 1 AND 2" +
+                    " AND a.nDelayAvg BETWEEN 1 AND 3" +
                 " HAVING xTransNox IS NULL" +
                 " ORDER BY DAY(a.dDueDatex)";
         
