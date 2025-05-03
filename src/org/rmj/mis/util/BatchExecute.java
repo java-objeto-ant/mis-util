@@ -35,16 +35,18 @@ public class BatchExecute {
             System.exit(1);
         }
         
-        instance.beginTrans();
+        
         for (int lnCtr = 0; lnCtr <= loStatement.size()-1; lnCtr++){
 //            instance.executeQuery((String) loStatement.get(lnCtr), "xxxTableAll", instance.getBranchCode(), "C131");
+            instance.beginTrans();
             if (instance.executeQuery((String) loStatement.get(lnCtr), "xxxTableAll", instance.getBranchCode(), "") <= 0){
                 instance.rollbackTrans();
                 logwrapr.severe("Error: " + (String) loStatement.get(lnCtr));
                 System.exit(1);
             }
+            instance.commitTrans();
         }
-        instance.commitTrans();
+        
         logwrapr.info("Thank you.");
     }
     
