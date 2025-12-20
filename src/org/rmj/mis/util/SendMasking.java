@@ -27,11 +27,7 @@ public class SendMasking {
             System.exit(1);
         }
         
-        String message = "Missed your July payment?\n" +
-                            "\n" +
-                            "Pay in our office now until Aug 15 and claim your rebate.\n" +
-                            "\n" +
-                            "Don't miss this limited-time offer.";
+        String message = "APP_RQST EP/M001/M00125003352;2025-10-22;145000.0;Additional Installation Of Pedestal And Baseboard For Pre-function And Hallway Engr. Ar. Jasmine Nabua/By:Mariah Karla Cuison";
 
         MaskSMS processor = new MaskSMS(instance, logwrapr);
         processor.setMaskName("GUANZON");

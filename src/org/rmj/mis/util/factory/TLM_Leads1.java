@@ -271,7 +271,8 @@ public class TLM_Leads1 implements UtilityValidator{
                                 " AND a.dFollowUp IS NULL))" + 
                 " HAVING dFollowUp BETWEEN " + SQLUtil.toSQL(fsDateFrom) + " AND " + SQLUtil.toSQL(fsDateThru) +
                     " OR dTargetxx BETWEEN " + SQLUtil.toSQL(fsDateFrom) + " AND " + SQLUtil.toSQL(fsDateThru) +
-                " ORDER BY dFollowUp DESC, dTargetxx ASC";
+                " ORDER BY dFollowUp DESC, dTargetxx DESC";
+                //" ORDER BY dFollowUp DESC, dTargetxx ASC";
         
         loRS = instance.executeQuery(lsSQL);
         
@@ -304,10 +305,11 @@ public class TLM_Leads1 implements UtilityValidator{
                             " AND a.dFollowUp IS NULL)" +
                         " OR (a.sInquiryx IN ('WS', 'BF', 'DS', 'FS')" + 
                             " AND a.dTargetxx IS NULL" + 
-                            " AND a.dFollowUp IS NULL))";
+                            " AND a.dFollowUp IS NULL))" +
+                " ORDER BY dTransact ASC";
         
-        lsSQL += " HAVING dTransact BETWEEN " + SQLUtil.toSQL(fsDateFrom) + " AND " + SQLUtil.toSQL(fsDateThru);
-        lsSQL += " ORDER BY dTransact ASC";
+        //lsSQL += " HAVING dTransact BETWEEN " + SQLUtil.toSQL(fsDateFrom) + " AND " + SQLUtil.toSQL(fsDateThru);
+        //lsSQL += " ORDER BY dTransact ASC";
 
         loRS = instance.executeQuery(lsSQL);
         
@@ -345,7 +347,7 @@ public class TLM_Leads1 implements UtilityValidator{
                             " OR (DATE_ADD(a.dTargetxx, INTERVAL - 2 DAY) <= CURRENT_DATE()" + 
                                 " AND a.dFollowUp IS NULL))" + 
                 " HAVING dFollowUp >= '2024-03-01' OR dTargetxx >= '2024-03-01'" +
-                " ORDER BY dFollowUp DESC, dTargetxx ASC";
+                " ORDER BY dFollowUp DESC, dTargetxx DESC";
         
 //        " AND (a.dFollowUp <= CURRENT_TIMESTAMP()" + 
 //                            " OR (a.dTargetxx <= CURRENT_TIMESTAMP()" + 
@@ -404,7 +406,7 @@ public class TLM_Leads1 implements UtilityValidator{
         
         //3rd priority
         //process old inquiries
-        loRS = get_inqr_old(lcSubScribe, "2024-01-01", "2024-01-31");
+        loRS = get_inqr_old(lcSubScribe, "2025-03-01", "2025-03-31");
         if (loRS != null) processLeads(loRS, n2Fill, lcSubScribe);
         
         n2Fill = get2Fill(pxePriorityFill, lcSubScribe);
@@ -413,7 +415,7 @@ public class TLM_Leads1 implements UtilityValidator{
         
         //4th priority
         //process old inquiries
-        loRS = get_inqr_old(lcSubScribe, "2024-02-01", "2024-02-29");
+        loRS = get_inqr_old(lcSubScribe, "2025-02-01", "2025-02-28");
         if (loRS != null) processLeads(loRS, n2Fill, lcSubScribe);
         
         n2Fill = get2Fill(pxePriorityFill, lcSubScribe);
@@ -422,7 +424,7 @@ public class TLM_Leads1 implements UtilityValidator{
         
         //4th priority
         //process old inquiries
-        loRS = get_inqr_old(lcSubScribe, "2023-12-01", "2023-12-31");
+        loRS = get_inqr_old(lcSubScribe, "2025-01-01", "2025-01-31");
         if (loRS != null) processLeads(loRS, n2Fill, lcSubScribe);
         
         n2Fill = get2Fill(pxePriorityFill, lcSubScribe);
