@@ -163,20 +163,181 @@ public class MPISys2CASys {
                 
                 //check if the transaction has credit card payment
                 lsSQL = "SELECT" +
+                            "  a.sTransNox" +
+                            ", b.sBankName sTerminal" +
+                            ", c.sBankName" +
+                            ", d.sCardname" +
+                            ", a.sCrCardNo" +
+                            ", a.sApprovNo" +
+                            ", a.nTranTotl" +
+                            ", a.nTranTotl xApprTotl" +
+                            ", e.sTermName" +
+                            ", a.sTermnlID" +
+                            ", a.sBankIDxx" +
+                            ", a.sCrCardID" +
+                            ", a.sTermIDxx" +
+                            ", a.sCollectd" +
+                            ", a.dCollectd" +
+                            ", a.dModified" +
+                            ", a.sTransNox xTransNox" +
+                            ", a.sCrCardNo xCrCardNo" +
+                            ", a.sApprovNo xApprovNo" +
+                            ", f.nAmountxx" +
+                            ", f.nBaseAmtx" +
+                            ", a.sBatchNox" +
+                            ", f.sSourceCd" +
+                        " FROM MP_Credit_Card_Transaction a" +
+                                " LEFT JOIN Banks b ON a.sTermnlID = b.sBankIDxx" +
+                                " LEFT JOIN Banks c ON a.sBankIDxx = c.sBankIDxx" +
+                                " LEFT JOIN Card d ON a.sCrCardID = d.sCardIDxx" +
+                                " LEFT JOIN Term e ON a.sTermIDxx = e.sTermIDxx" +
+                            ", MP_SO_Credit_Card f" +
+                        " WHERE a.sTransNox = f.sReferNox" +
+                            " AND f.sSourceCd = 'CPSl'" +
+                            " AND f.sTransNox = " + SQLUtil.toSQL(trans.getString("sTransNox"));
+                
+                ResultSet loCard = maindb.executeQuery(lsSQL);
+                
+                //insert credit card details
+                if (loCard.next()){
+                    lsSQL = "INSERT INTO Credit_Card_Trans SET" +
+                            "  sTransNox = " +
+                            ", sBranchCd = " +
+                            ", sTermnlID = " +
+                            ", sBankCode = " +
+                            ", sCardIDxx = " +
+                            ", sCardNoxx = " +
+                            ", sApprovNo = " +
+                            ", sBatchNox = " +
+                            ", nAmountxx = " +
+                            ", sTermCode = " +
+                            ", sSourceCd = " +
+                            ", sSourceNo = " +
+                            ", sCollectd = " +
+                            ", dCollectd = " +
+                            ", nBankChrg = " +
+                            ", nTaxAmtxx = " +
+                            ", nAmtPaidx = " +
+                            ", cTranStat = ";
+                }
+                
+                //check if transaction has check payment
+                lsSQL = "SELECT" +
                             "  sTransNox" +
-                            ", sSourceCD" +
-                            ", sTermnlID" +
                             ", sBankIDxx" +
-                            ", sCrCardID" +
-                            ", sCrCardNo" +
-                            ", sApprovNo" +
-                            ", nTranTotl" +
-                            ", sTermIDxx" +
-                            ", sCollectd" +
-                            ", dCollectd" +
+                            ", dCheckDte" +
+                            ", sCheckNox" +
+                            ", sAcctNoxx" +
+                            ", nAmountxx" +
+                            ", cDepositd" +
+                            ", nClearing" +
+                            ", cChckStat" +
+                            ", cTranStat" +
                             ", dModified" +
-                        " FROM CP_SO_Credit_Card" + 
+                        " FROM CP_SO_Checks" +
                         " WHERE sTransNox = " + SQLUtil.toSQL(trans.getString("sTransNox"));
+                
+                ResultSet loCheck = maindb.executeQuery(lsSQL);
+                
+                if (loCheck.next()){
+                    lsSQL = "INSERT INTO Check_Payment_Trans SET" + 
+                            "  sTransNox = " +
+                            ", dTransact = " +
+                            ", sBankCode = " +
+                            ", sCheckNox = " +
+                            ", dCheckDte = " +
+                            ", nAmountxx = " +
+                            ", sRemarksx = " +
+                            ", nClearDay = " +
+                            ", sSourceCd = " +
+                            ", sSourceNo = " +
+                            ", cTranStat = ";
+                }
+                
+                //check if transaction has other payment
+                lsSQL = "SELECT" +
+                            "  a.sTransNox" +
+                            ", a.sClientID" +
+                            ", a.nTotlAmnt" +
+                            ", a.sRemarksx" +
+                            ", a.nAmtPaidx" +
+                            ", b.sCompnyNm" +
+                            ", a.dModified" +
+                            ", c.nTranTotl" +
+                            ", a.sReferNox" +
+                            ", a.sTermCode" +
+                            ", e.sTermName" +
+                        " FROM Other_Payment_Received a" +
+                            " LEFT JOIN Term e" +
+                                " ON a.sTermCode = e.sTermIDxx" +
+                            ", Client_Master b" +
+                            ", CP_SO_Master c" +
+                            ", Payment_Processor d" +
+                        " WHERE a.sClientID = b.sClientID" +
+                            " AND b.sClientID = d.sClientID" +
+                            " AND a.sSourceCd =  'CPSl'" +
+                            " AND a.sSourceNo = c.sTransNox" +
+                            " AND a.sSourceNo = " + SQLUtil.toSQL(trans.getString("sTransNox"));
+                
+                ResultSet loOther = maindb.executeQuery(lsSQL);
+                
+                if (loOther.next()){
+                    //CP financer
+                    lsSQL = "INSERT INTO CP_Financer SET" +
+                            "  sFnancrID = " +
+                            ", sCompnyNm = " +
+                            ", sCPerson1 = " +
+                            ", sCPPosit1 = " +
+                            ", sTelNoxxx = " +
+                            ", sFaxNoxxx = " +
+                            ", sRemarksx = " +
+                            ", sTermIDxx = " +
+                            ", nDiscount = " +
+                            ", nCredLimt = " +
+                            ", nABalance = " +
+                            ", dCltSince = " +
+                            ", cInHousex = " +
+                            ", cEPayment = " +
+                            ", cRecdStat = ";
+                    
+                    //Financer trans
+                    lsSQL = "INSERT INTO Financer_Trans SET" +
+                            "  sTransNox = " +
+                            ", sClientID = " +
+                            ", sReferNox = " +
+                            ", nFinAmtxx = " +
+                            ", nAmtPaidx = " +
+                            ", sRemarksx = " +
+                            ", sTermCode = " +
+                            ", sSourceCd = " +
+                            ", sSourceNo = " +
+                            ", cTranStat = ";
+                }
+                
+                //insert receipt info
+                lsSQL = "INSERT INTO Receipt_Master SET" + 
+                        "  sTransNox = " +
+                        ", sORNumber = " +
+                        ", nVATSales = " +	
+                        ", nVATAmtxx = " +	
+                        ", nNonVATSl = " +	
+                        ", nZroVATSl = " +	
+                        ", nCWTAmtxx = " +	
+                        ", nAdvPaymx = " +	
+                        ", nCashAmtx = " +	
+                        ", sSourceCd = " +
+                        ", sSourceNo = " +
+                        ", sCashierx = " +
+                        ", cPrintedx = " +
+                        ", cTranStat = ";
+                
+                //insert sales payment info; payments other than cash
+                lsSQL = " INSERT INTO Sales_Payment SET" +
+                        "  sTransNox = " +
+                        ", cPaymForm = " +
+                        ", nAmountxx = " +
+                        ", sSourceCd = " +
+                        ", sSourceNo = ";
                 
                 posDB.commitTrans();
             }
