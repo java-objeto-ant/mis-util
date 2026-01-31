@@ -2,7 +2,6 @@ package org.rmj.mis.util.factory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import org.rmj.appdriver.MiscUtil;
 import org.rmj.appdriver.SQLUtil;
 import org.rmj.appdriver.agent.GRiderX;
@@ -16,7 +15,8 @@ public class TLM_Leads1 implements UtilityValidator{
     private final int pxe2Fill = 15;
     private final int pxePriorityFill = 15;
     private final int pxeLastDateInqr = -60;
-    private final String pxeInquiry = "2021-05-01";
+    private final String pxeInquiry = "2026-01-01"; //2021-05-01
+    private final String pxeInquiry2 = "2025-07-01";
     
     private GRiderX instance;
     private String sMessage;
@@ -35,19 +35,19 @@ public class TLM_Leads1 implements UtilityValidator{
     public boolean Run() {        
         //top priority MC Facebook Inquiries
         int lnTotal = 0;
-        int lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE),"0");
+        int lnFilled = fill_sched_from_inquiry("MC", "FB","0");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - GLOBE");
         lnTotal += lnFilled;
         
-        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
+        lnFilled = fill_sched_from_inquiry("MC", "FB", "1");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SMART");
         lnTotal += lnFilled;
         
-        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
+        lnFilled = fill_sched_from_inquiry("MC", "FB", "2");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - SUN");
         lnTotal += lnFilled;
         
-        lnFilled = fill_sched_from_inquiry("MC", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
+        lnFilled = fill_sched_from_inquiry("MC", "FB", "3");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MC. - DITO");
         lnTotal += lnFilled;
         
@@ -55,19 +55,19 @@ public class TLM_Leads1 implements UtilityValidator{
         
         //top priority MP Facebook Inquiries
         lnTotal = 0;
-        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "0");
+        lnFilled = fill_sched_from_inquiry("MP", "FB", "0");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - GLOBE");
         lnTotal += lnFilled;
         
-        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "1");
+        lnFilled = fill_sched_from_inquiry("MP", "FB", "1");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SMART");
         lnTotal += lnFilled;
         
-        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "2");
+        lnFilled = fill_sched_from_inquiry("MP", "FB", "2");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - SUN");
         lnTotal += lnFilled;   
         
-        lnFilled = fill_sched_from_inquiry("MP", "FB", SQLUtil.toDate(pxeInquiry, SQLUtil.FORMAT_SHORT_DATE), "3");
+        lnFilled = fill_sched_from_inquiry("MP", "FB", "3");
         System.out.println("System inserted " + lnFilled + " facebook inquiries from MP. - DITO");
         lnTotal += lnFilled;    
         
@@ -168,7 +168,7 @@ public class TLM_Leads1 implements UtilityValidator{
     
     //mac 2021.05.22
     //  separate retreival of FB Inquiries to set as top priority on TLM Leads
-    private int fill_sched_from_inquiry(String fsDivision, String fsInquryTp, Date ldStart, String fcSubscrbr){
+    private int fill_sched_from_inquiry(String fsDivision, String fsInquryTp, String fcSubscrbr){
         String lsSQL;
         
         switch (fsDivision.toLowerCase()){
@@ -346,7 +346,7 @@ public class TLM_Leads1 implements UtilityValidator{
                     " AND (a.dFollowUp <= CURRENT_TIMESTAMP()" + 
                             " OR (DATE_ADD(a.dTargetxx, INTERVAL - 2 DAY) <= CURRENT_DATE()" + 
                                 " AND a.dFollowUp IS NULL))" + 
-                " HAVING dFollowUp >= '2024-03-01' OR dTargetxx >= '2024-03-01'" +
+                " HAVING dFollowUp >= " + SQLUtil.toSQL(pxeInquiry) + " OR dTargetxx >= " + SQLUtil.toSQL(pxeInquiry) +
                 " ORDER BY dFollowUp DESC, dTargetxx DESC";
         
 //        " AND (a.dFollowUp <= CURRENT_TIMESTAMP()" + 
@@ -392,7 +392,7 @@ public class TLM_Leads1 implements UtilityValidator{
                             " AND a.dTargetxx IS NULL" + 
                             " AND a.dFollowUp IS NULL))";
         
-        lsSQL += " HAVING dTransact >= '2024-03-01'";
+        lsSQL += " HAVING dTransact >= " + SQLUtil.toSQL(pxeInquiry2);
         lsSQL += " ORDER BY dTransact ASC";
 
         loRS = instance.executeQuery(lsSQL);
@@ -406,7 +406,7 @@ public class TLM_Leads1 implements UtilityValidator{
         
         //3rd priority
         //process old inquiries
-        loRS = get_inqr_old(lcSubScribe, "2025-03-01", "2025-03-31");
+        loRS = get_inqr_old(lcSubScribe, "2025-06-01", "2025-06-30");
         if (loRS != null) processLeads(loRS, n2Fill, lcSubScribe);
         
         n2Fill = get2Fill(pxePriorityFill, lcSubScribe);
@@ -415,7 +415,7 @@ public class TLM_Leads1 implements UtilityValidator{
         
         //4th priority
         //process old inquiries
-        loRS = get_inqr_old(lcSubScribe, "2025-02-01", "2025-02-28");
+        loRS = get_inqr_old(lcSubScribe, "2025-05-01", "2025-05-31");
         if (loRS != null) processLeads(loRS, n2Fill, lcSubScribe);
         
         n2Fill = get2Fill(pxePriorityFill, lcSubScribe);
@@ -424,7 +424,7 @@ public class TLM_Leads1 implements UtilityValidator{
         
         //4th priority
         //process old inquiries
-        loRS = get_inqr_old(lcSubScribe, "2025-01-01", "2025-01-31");
+        loRS = get_inqr_old(lcSubScribe, "2025-04-01", "2025-04-30");
         if (loRS != null) processLeads(loRS, n2Fill, lcSubScribe);
         
         n2Fill = get2Fill(pxePriorityFill, lcSubScribe);
